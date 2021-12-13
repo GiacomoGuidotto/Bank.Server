@@ -1,0 +1,653 @@
+openapi: 3.0.3
+info:
+  title: Bank Management System
+  version: 1.0.0
+  description: |
+    The Bank Management System API supports the data flow and transactions of an Online Bank.
+
+    The API includes the following capabilities and operation:
+
+    __Demilitarized Zone:__
+    - Authenticate
+    - Create a new user
+
+    __Militarized Zone:__
+
+    - __User Management:__
+      - Get a specific user information
+
+    - __Deposits Management:__
+      - Get user's list of deposits
+      - Create a new deposit
+      - Get a specific deposit information
+      - Close (freeze) a specific deposit
+      - "Deposit" money in a specific deposit
+      - "Withdraw" money from a specific deposit
+
+    - __Loan Management:__
+      - Create a new loan for a deposit
+      - Get a specific loan information
+      - Close a specific loan
+
+    The following resource collections are offered by this API:
+    - User: represents the user data
+    - Session Token: represents the authentication token to use
+    - Deposit: represents the data of a deposit of an account
+    - Loan: represents the data of a loan of a deposit
+
+paths:
+  # DMZ
+  /auth:
+    get:
+      operationId: authenticate
+      summary: Get the session token
+      description: Retrieve the session token with the username/password combination
+      parameters:
+        - name: username
+          in: header
+          description: the username to authenticate
+          required: true
+          schema:
+            $ref: "#/components/schemas/userUsername"
+        - name: password
+          in: header
+          description: the user password to authenticate
+          required: true
+          schema:
+            $ref: "#/components/schemas/userPassword"
+      responses:
+        200:
+          description: The user is authenticated and the token created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  Token:
+                    $ref: "#/components/parameters/sessionToken"
+        404:
+          $ref: "#/components/responses/404"
+
+  /user:
+    post:
+      operationId: createUser
+      summary: Create a new user
+      description: create a new user using the given parameters
+      parameters:
+        - name: username
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/userUsername"
+        - name: password
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/userPassword"
+        - name: name
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/userName"
+        - name: surname
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/userSurname"
+      responses:
+        200:
+          description: The new user is been successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  IBAN:
+                    $ref: "#/components/schemas/userIBAN"
+        400:
+          $ref: "#/components/responses/400"
+
+    # MZ
+    get:
+      operationId: getUser
+      summary: Get the user information
+      description: Retrieve user's name, surname, IBAN from the database
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+      responses:
+        200:
+          description: the information are retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/userObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+
+  /deposit:
+    get:
+      operationId: getDeposits
+      summary: Get the deposits information
+      description: |
+        Retrieve the list of deposit's name from the database.
+        If a deposit name is given, the query is filtered and
+        is retrieved the specific deposit's name, amount,
+        type from the database.
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - name: name
+          in: header
+          description: The optional filter
+          required: false
+          schema:
+            $ref: "#/components/schemas/depositName"
+      responses:
+        200:
+          description: |
+            The list of deposits is retrieved or
+            the single deposit is retrieved
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/depositObject"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/depositObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+
+    post:
+      operationId: createDeposit
+      summary: Open a new deposit
+      description: create a new deposit using the given parameters
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - $ref: "#/components/parameters/depositIdentifier"
+        - name: type
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/depositType"
+        - name: amount
+          in: header
+          required: false
+          schema:
+            $ref: "#/components/schemas/depositAmount"
+      responses:
+        200:
+          description: The new deposit is successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/depositObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+
+    delete:
+      operationId: closeDeposit
+      summary: Freeze a specific deposit
+      description: Make a specific deposit unreachable
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - $ref: "#/components/parameters/depositIdentifier"
+      responses:
+        200:
+          description: |
+            The deposit is successfully froze.
+            The new deposits list is returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/depositObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+
+    put:
+      operationId: updateAmount
+      summary: Update the deposit amount
+      description: |
+        represent either a "Deposit" or a "Withdraw" of
+        a quantity of money in the specific deposit
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - $ref: "#/components/parameters/depositIdentifier"
+        - name: action
+          in: header
+          required: true
+          schema:
+            type: string
+            enum:
+              - Deposit
+              - Withdraw
+          description: |
+            the identifier of the update action
+        - name: amount
+          in: header
+          required: true
+          schema:
+            type: number
+          description: |
+            the number to add to the deposit's amount.
+            It can't be negative
+      responses:
+        200:
+          description: The "deposit" is happened successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/depositObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+
+  /history:
+    get:
+      operationId: getHistory
+      summary: get the deposit's transaction history
+      description: |
+        Retrive the deposit's transaction history list:
+        transaction type, amount deducted, author and timestamp
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - $ref: "#/components/parameters/depositIdentifier"
+      responses:
+        '200':
+          description: The history is retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/transactionObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+
+  /loan:
+    get:
+      operationId: getLoans
+      summary: get the loans information
+      description: |
+        Retrieve the list of loan's name from the database.
+        If either a loan name or the linked deposit is given,
+        the query is filtered and is retrieved the specific
+        loan's name, total amount of money borrowed, amount
+        of money deducted monthly, the interest rate, the
+        repayment day, type from the database.
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - name: name
+          in: header
+          description: |
+            the optional loan name, working as filter
+          required: false
+          schema:
+            $ref: "#/components/schemas/loanName"
+        - name: deposit
+          in: header
+          description: |
+            the optional linked deposit, working as filter
+          required: false
+          schema:
+            $ref: "#/components/schemas/loanName"
+      responses:
+        200:
+          description: |
+            The list of loans is retrieved or
+            the single loan is retrieved
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/loanObject"
+                  - type: array
+                    items:
+                      $ref: "#/components/schemas/loanObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+
+    post:
+      operationId: createLoan
+      summary: Open a new loan
+      description: create a new loan using the given parameters
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - $ref: "#/components/parameters/depositIdentifier"
+        - $ref: "#/components/parameters/loanIdentifier"
+        - name: amountAsked
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/loanAmount"
+        - name: repaymentDay
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/loanRepaymentDay"
+        - name: type
+          in: header
+          required: true
+          schema:
+            $ref: "#/components/schemas/loanType"
+      responses:
+        200:
+          description: the new loan is successfully created
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/loanObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+
+    delete:
+      operationId: closeLoan
+      summary: Conclude a specific loan
+      description: |
+        Deduct the remaining amount of money required
+        from the loan
+      parameters:
+        - $ref: "#/components/parameters/sessionToken"
+        - $ref: "#/components/parameters/loanIdentifier"
+      responses:
+        200:
+          description: |
+            The loan is successfully completed.
+            The new loan list is returned
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/loanObject"
+        400:
+          $ref: "#/components/responses/400"
+        401:
+          $ref: "#/components/responses/401"
+        403:
+          $ref: "#/components/responses/403"
+        404:
+          $ref: "#/components/responses/404"
+
+
+# =======================================================================================
+components:
+  parameters:
+    sessionToken:
+      name: sessionToken
+      in: header
+      description: the token used to authenticate the user
+      required: true
+      schema:
+        $ref: "#/components/parameters/sessionToken"
+
+    depositIdentifier:
+      name: depositName
+      in: header
+      description: The deposit identifier
+      required: true
+      schema:
+        $ref: "#/components/schemas/depositName"
+
+    loanIdentifier:
+      name: loanName
+      in: header
+      description: The loan identifier
+      required: true
+      schema:
+        $ref: "#/components/schemas/loanName"
+
+
+  responses:
+    400:
+      description: the parameters don't correspond to their schema
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/errorMessage"
+    401:
+      description: the session token does not exist
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/errorMessage"
+    403:
+      description: the resources doesn't belong to the user of this session token
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/errorMessage"
+    404:
+      description: the entity does not exist
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/errorMessage"
+
+
+  schemas:
+    # error case
+    errorMessage:
+      type: object
+      properties:
+        timestamp:
+          type: string
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: string
+
+    # session token
+    sessionToken:
+      type: string
+      description: |
+        the identifier of the active session
+
+    # user's attributes
+    userUsername:
+      type: string
+      description: |
+        The user identifier
+
+    userPassword:
+      type: string
+      description: |
+        The hashed password of the account
+
+    userName:
+      type: string
+      description: |
+        the user's name
+
+    userSurname:
+      type: string
+      description: |
+        the user's surname
+
+    userIBAN:
+      type: string
+      description: |
+        the user's International Bank Address Number
+
+    # deposit's attributes
+    depositName:
+      type: string
+      description: |
+        the name of the deposit
+
+    depositAmount:
+      type: number
+      description: |
+        the amount of money in the deposit
+
+    depositType:
+      type: string
+      enum:
+        - Standard
+        # - Saving
+        # - Fixed
+      description: |
+        the type of the deposit:
+        - standard: the money can be withdraw anytime
+        - saving: the money can be withdraw limited to a mininum amount
+        - fixed: the money can be withdraw after a certain period
+        only the first case will be implemented
+
+    # transaction history's attributes
+    transactionType:
+      type: string
+      enum:
+        - deposit
+        - withdraw
+      description: |
+        the type of the transaction listed and made to the deposit
+
+    transactionAmount:
+      type: number
+      description: |
+        the amount of money added or subtracted from the deposit
+
+    transactionDate:
+      type: string
+      description: |
+        the moment that the transaction happened
+
+    transactionAuthor:
+      type: string
+      description: |
+        the perpetrator of the transaction
+
+    # loan's attributes
+    loanName:
+      type: string
+      description: |
+        the name of the loan
+
+    loanAmount:
+      type: number
+      description: |
+        the total amount of money borrowed from the bank
+
+    loanInterestRate:
+      type: number
+      description: |
+        the rate for how much money are deducted each month
+
+    loanRate:
+      type: number
+      description: |
+        the calculated amount of money to deduct each month
+
+    loanRepaymentDay:
+      type: string
+      description: |
+        the last date of validity of the loan
+
+    loanType:
+      type: string
+      enum:
+        - secured
+        # - unsecured
+        # - subsided
+        # - demand
+      description: |
+        the type of the loan:
+        - secured: the loan is insured with an object in case the repayment fail
+        - unsecured: the loan isn't insured, during the month the deposit can go negative
+        - subsided: the loan is shared with a third party, usually a government association
+        - demand: the loan is quick and with floating interest rate and flexible repayment date
+        only the first case will be implemented
+
+    # public attributes objects
+    userObject:
+      type: object
+      properties:
+        username:
+          $ref: "#/components/schemas/userUsername"
+        name:
+          $ref: "#/components/schemas/userName"
+        surname:
+          $ref: "#/components/schemas/userSurname"
+        IBAN:
+          $ref: "#/components/schemas/userIBAN"
+      description: |
+        the public attributes of the user, stored in an object
+
+    depositObject:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/depositName"
+        amount:
+          $ref: "#/components/schemas/depositAmount"
+        type:
+          $ref: "#/components/schemas/depositType"
+      description: |
+        the public attributes of the deposit, stored in an object
+
+    transactionObject:
+      type: object
+      properties:
+        type:
+          $ref: "#/components/schemas/transactionType"
+        amount:
+          $ref: "#/components/schemas/transactionAmount"
+        date:
+          $ref: "#/components/schemas/transactionDate"
+        author:
+          $ref: "#/components/schemas/transactionAuthor"
+      description: |
+        the public attributes of the transaction, stored in an object
+
+    loanObject:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/loanName"
+        totalAmount:
+          $ref: "#/components/schemas/loanAmount"
+        rate:
+          $ref: "#/components/schemas/loanRate"
+        interestRate:
+          $ref: "#/components/schemas/loanInterestRate"
+        repaymentDay:
+          $ref: "#/components/schemas/loanRepaymentDay"
+        type:
+          $ref: "#/components/schemas/loanType"
+      description: |
+        the public attributes of the loan, stored in an object
+
