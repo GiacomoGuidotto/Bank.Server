@@ -15,24 +15,32 @@ info:
 
     - __User Management:__
       - Get a specific user information
+      - Delete a specific user
+
+    - __Log out__
 
     - __Deposits Management:__
       - Get user's list of deposits
-      - Create a new deposit
       - Get a specific deposit information
+      - Create a new deposit
       - Close (freeze) a specific deposit
       - "Deposit" money in a specific deposit
       - "Withdraw" money from a specific deposit
 
+    - __Transaction Histories Management:__
+      - Get a transaction history of a specific deposit
+
     - __Loan Management:__
-      - Create a new loan for a deposit
       - Get a specific loan information
+      - Create a new loan for a deposit
       - Close a specific loan
 
+
     The following resource collections are offered by this API:
-    - User: represents the user data
     - Session Token: represents the authentication token to use
+    - User: represents the user data
     - Deposit: represents the data of a deposit of an account
+    - Transaction History: represent the history of a deposit
     - Loan: represents the data of a loan of a deposit
 
 paths:
@@ -289,9 +297,10 @@ paths:
           required: true
           schema:
             type: number
-          description: |
-            the number to add to the deposit's amount.
-            It can't be negative
+            minimum: 0
+            description: |
+              the number to add to the deposit's amount.
+              It can't be negative
       responses:
         200:
           description: The "deposit" is happened successfully
@@ -562,15 +571,15 @@ components:
         # does:
 
         # (?=.*\d)
-        # contains a digit: \d
+      # contains a digit: \d
 
-        # (?=.*[A-Z])
-        # contains an uppercase letter: [A-Z]
+      # (?=.*[A-Z])
+      # contains an uppercase letter: [A-Z]
 
-        # (?=.*[a-z])
-        # contains a lowercase letter: [a-z]
+      # (?=.*[a-z])
+      # contains a lowercase letter: [a-z]
 
-        # (?=.*[^\w\d\s:])
+      # (?=.*[^\w\d\s:])
       # contains a character that is not (^)
       # a word char     (\w, equivalent to [a-zA-Z0-9])
       # or a digit      (\d, equivalent to [0-9])
@@ -629,9 +638,9 @@ components:
       minLength: 5
       maxLength: 8
       enum:
-        - Standard
-        # - Saving
-        # - Fixed
+        - standard
+        # - saving
+        # - fixed
       description: |
         the type of the deposit:
         - standard: the money can be withdraw anytime
@@ -790,7 +799,7 @@ components:
         totalAmount:
           $ref: "#/components/schemas/loanAmount"
         monthlyRate:
-          $ref: "#/components/schemas/loanRate"
+          $ref: "#/components/schemas/loanMonthlyRate"
         interestRate:
           $ref: "#/components/schemas/loanInterestRate"
         repaymentDay:
