@@ -7,21 +7,22 @@ use Model\Entity;
 use PHPUnit\Framework\TestCase;
 use Specifics\ErrorCases\ExceedingMaxLength;
 use Specifics\ErrorCases\ExceedingMinLength;
+use Specifics\ErrorCases\IncorrectPattern;
 use Specifics\ErrorCases\NullAttributes;
 
 class UserImplTest extends TestCase
 {
-    protected User $user;
+    protected User $validUser;
 
     /**
      * @throws Exception
      */
     protected function setUp(): void
     {
-        $this->user = new UserImpl(
+        $this->validUser = new UserImpl(
             1,
             'john.doe',
-            'password',
+            '^@},hJu>[4Bo7TGX',
             'John',
             'Doe',
             '000000000000000000000',
@@ -31,12 +32,12 @@ class UserImplTest extends TestCase
 
     public function testGetEntityName()
     {
-        $this->assertEquals('user', $this->user->getEntityName());
+        $this->assertEquals('user', $this->validUser->getEntityName());
     }
 
     public function testGetAttributesAndVisibility()
     {
-        $testedArray = $this->user->getAttributesAndVisibility();
+        $testedArray = $this->validUser->getAttributesAndVisibility();
 
         $attributes = [
             'id',
@@ -68,7 +69,7 @@ class UserImplTest extends TestCase
         new UserImpl(
             1,
             '',
-            'password',
+            '^@},hJu>[4Bo7TGX',
             'John',
             'Doe',
             '000000000000000000000',
@@ -85,7 +86,25 @@ class UserImplTest extends TestCase
         new UserImpl(
             1,
             'john.doe',
-            'pwd',
+            '|Ylc|1',
+            'John',
+            'Doe',
+            '000000000000000000000',
+            true
+        );
+    }
+
+    public function testWrongPassword()
+    {
+        $this->expectException(Exception::class);
+        $this->expectExceptionMessage('[password]: ' . IncorrectPattern::MESSAGE);
+        $this->expectExceptionCode(IncorrectPattern::CODE);
+
+
+        new UserImpl(
+            1,
+            'john.doe',
+            'password',
             'John',
             'Doe',
             '000000000000000000000',
@@ -102,7 +121,7 @@ class UserImplTest extends TestCase
         new UserImpl(
             1,
             'john.doe',
-            'password',
+            '^@},hJu>[4Bo7TGX',
             'John',
             'Doe',
             '000000000000000000000000000000000',
