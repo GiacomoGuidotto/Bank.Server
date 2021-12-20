@@ -6,6 +6,7 @@ use Exception;
 use Model\Entity;
 use Specifics\ErrorCases\ExceedingMaxLength;
 use Specifics\ErrorCases\ExceedingMinLength;
+use Specifics\ErrorCases\IncorrectPattern;
 use Specifics\ErrorCases\NullAttributes;
 
 /**
@@ -138,6 +139,9 @@ class UserImpl implements Entity, User
         }
         if (strlen($password) < 8) {
             throw new Exception('[password]: ' . ExceedingMinLength::MESSAGE, ExceedingMinLength::CODE);
+        }
+        if (preg_match("#^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,32}$#", $password) != 1) {
+            throw new Exception('[password]: ' . IncorrectPattern::MESSAGE, IncorrectPattern::CODE);
         }
     }
 

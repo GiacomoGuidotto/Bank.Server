@@ -4,6 +4,11 @@ namespace Model\Deposit;
 
 use Exception;
 
+/**
+ * Deposit Interface, declare specific methods for the deposit resource
+ *
+ * @category Interface
+ */
 interface Deposit
 {
     /**

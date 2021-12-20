@@ -562,15 +562,15 @@ components:
       minLength: 8
       maxLength: 32
       pattern: ^(?=.*\d)(?=.*[A-Z])(?=.*[a-z])(?=.*[^\w\d\s:])([^\s]){8,32}$
-        # ^
-        # start of the line
+      # ^
+      # start of the line
 
-        # 4 evaluation contained in (?= )
-        # that assert that any character .
-        # from the entire line *
-        # does:
+      # 4 evaluation contained in (?= )
+      # that assert that any character .
+      # from the entire line *
+      # does:
 
-        # (?=.*\d)
+      # (?=.*\d)
       # contains a digit: \d
 
       # (?=.*[A-Z])

@@ -12,6 +12,7 @@ define('ErrorCodes', [
     10 => 'ExceedingMaxLength',
     11 => 'ExceedingMinLength',
     12 => 'IncorrectParsing',
+    13 => 'IncorrectPattern',
     // int-related
     20 => 'ExceedingMaxRange',
     21 => 'ExceedingMinRange'
@@ -47,6 +48,13 @@ class IncorrectParsing
     const CODE = 12;
     const MESSAGE = "string isn't one of the predefined";
     const DETAILS = "the string-typed attribute doesn't correspond to predefined schema";
+}
+
+class IncorrectPattern
+{
+    const CODE = 13;
+    const MESSAGE = "string isn't following the regex pattern";
+    const DETAILS = "the string-typed attribute doesn't follow the regex pattern";
 }
 
 // integer (32 bit) invalid cases

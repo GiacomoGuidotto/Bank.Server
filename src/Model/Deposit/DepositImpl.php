@@ -46,6 +46,9 @@ class DepositImpl implements Entity, Deposit
     private string $type;
     private bool $active;
 
+    /**
+     * @throws Exception
+     */
     public function __construct(
         int    $id,
         int    $userId,
@@ -61,6 +64,8 @@ class DepositImpl implements Entity, Deposit
         $this->amount = $amount;
         $this->type = $type;
         $this->active = $active;
+
+        $this->validate();
 
     }
 

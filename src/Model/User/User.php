@@ -5,7 +5,7 @@ namespace Model\User;
 use Exception;
 
 /**
- * UserImpl Interface, declare specific methods for the user resource
+ * User Interface, declare specific methods for the user resource
  *
  * @category Interface
  */
