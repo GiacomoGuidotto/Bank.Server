@@ -2,14 +2,14 @@
 
 namespace Model\Loan;
 
-use Specifics\ErrorCases\ExceedingMaxLength;
-use Specifics\ErrorCases\ExceedingMaxRange;
-use Specifics\ErrorCases\ExceedingMinLength;
-use Specifics\ErrorCases\ExceedingMinRange;
-use Specifics\ErrorCases\IncorrectParsing;
-use Specifics\ErrorCases\IncorrectPattern;
-use Specifics\ErrorCases\NullAttributes;
-use Specifics\ErrorCases\Success;
+use Specifications\ErrorCases\ExceedingMaxLength;
+use Specifications\ErrorCases\ExceedingMaxRange;
+use Specifications\ErrorCases\ExceedingMinLength;
+use Specifications\ErrorCases\ExceedingMinRange;
+use Specifications\ErrorCases\IncorrectParsing;
+use Specifications\ErrorCases\IncorrectPattern;
+use Specifications\ErrorCases\NullAttributes;
+use Specifications\ErrorCases\Success;
 
 class LoanImpl implements Loan
 {

@@ -1,53 +1,38 @@
 <?php
 
-namespace Model\Transaction;
+namespace Model\Session;
 
 use Specifications\ErrorCases\ExceedingMaxLength;
-use Specifications\ErrorCases\ExceedingMaxRange;
 use Specifications\ErrorCases\ExceedingMinLength;
-use Specifications\ErrorCases\IncorrectParsing;
 use Specifications\ErrorCases\IncorrectPattern;
 use Specifications\ErrorCases\NullAttributes;
 use Specifications\ErrorCases\Success;
 
-class TransactionImpl implements Transaction
+class SessionImpl implements Session
 {
-    /**
-     * @inheritdoc
-     */
-    public static function validateType(string $type): int
-    {
-        $enum = ['withdraw', 'deposit'];
 
-        if ($type == null) {
+    /**
+     * @inheritDoc
+     */
+    public static function validateToken(string $token): int
+    {
+        if ($token == null) {
             return NullAttributes::CODE;
         }
-        if (!in_array($type, $enum, true)) {
-            return IncorrectParsing::CODE;
+        if (strlen($token) > 36) {
+            return ExceedingMaxLength::CODE;
+        }
+        if (strlen($token) < 36) {
+            return ExceedingMinLength::CODE;
         }
 
         return Success::CODE;
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    public static function validateAmount(int $amount): int
-    {
-        if ($amount == null) {
-            return NullAttributes::CODE;
-        }
-        if ($amount > 2 ** 31 - 1) {
-            return ExceedingMaxRange::CODE;
-        }
-
-        return Success::CODE;
-    }
-
-    /**
-     * @inheritdoc
-     */
-    public static function validateTimestamp(string $timestamp): int
+    public static function validateCreationTimestamp(string $timestamp): int
     {
         if ($timestamp == null) {
             return NullAttributes::CODE;
@@ -70,18 +55,25 @@ class TransactionImpl implements Transaction
     }
 
     /**
-     * @inheritdoc
+     * @inheritDoc
      */
-    public static function validateAuthor(string $author): int
+    public static function validateLastUpdated(string $timestamp): int
     {
-        if ($author == null) {
+        if ($timestamp == null) {
             return NullAttributes::CODE;
         }
-        if (strlen($author) > 129) {
+        if (strlen($timestamp) > 19) {
             return ExceedingMaxLength::CODE;
         }
-        if (strlen($author) < 1) {
+        if (strlen($timestamp) < 19) {
             return ExceedingMinLength::CODE;
+        }
+        // e.g. 2021-12-25 12:00:00
+        if (preg_match(
+                "#([0-9]{4})-(0[1-9]|1[1|2])-([0-2][0-9]|3[0|1]) ([0|1][0-9]|2[0-3])(:[0-5][0-9]){2}#",
+                $timestamp
+            ) != 1) {
+            return IncorrectPattern::CODE;
         }
 
         return Success::CODE;

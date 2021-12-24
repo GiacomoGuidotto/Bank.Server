@@ -3,50 +3,60 @@
 
 /** @noinspection PhpIllegalPsrClassPathInspection */
 
-namespace Specifics\ErrorCases;
+namespace Specifications\ErrorCases;
 
 /**
  * Error cases schemas:
  * code, message, details
  *
- * ==== success case =========
+ * ==== success case ===========
  * 00 Success
  *
- * ==== generic ==============
+ * ==== generic ================
  * 10 Null attributes
  *
- * ==== string-related =======
+ * ==== string-related =========
  * 20 Exceeding max length
  * 21 Exceeding min length
  * 22 Incorrect parsing
  * 23 Incorrect pattern
  *
- * ==== int-related ==========
+ * ==== int-related ============
  * 30 Exceeding max range
  * 31 Exceeding min range
+ *
+ * ==== elaboration-related ====
+ * 40 Already exist
+ * 41 Not found
  */
+interface ErrorCases
+{
+    const ERROR_MESSAGES = [
+        Success::CODE => Success::MESSAGE,
+        NullAttributes::CODE => NullAttributes::MESSAGE,
+        ExceedingMaxLength::CODE => ExceedingMaxLength::MESSAGE,
+        ExceedingMinLength::CODE => ExceedingMinLength::MESSAGE,
+        IncorrectParsing::CODE => IncorrectParsing::MESSAGE,
+        IncorrectPattern::CODE => IncorrectPattern::MESSAGE,
+        ExceedingMaxRange::CODE => ExceedingMaxRange::MESSAGE,
+        ExceedingMinRange::CODE => ExceedingMinRange::MESSAGE,
+        AlreadyExist::CODE => AlreadyExist::MESSAGE,
+        NotFound::CODE => NotFound::MESSAGE
+    ];
+    const ERROR_DETAILS = [
+        Success::CODE => Success::DETAILS,
+        NullAttributes::CODE => NullAttributes::DETAILS,
+        ExceedingMaxLength::CODE => ExceedingMaxLength::DETAILS,
+        ExceedingMinLength::CODE => ExceedingMinLength::DETAILS,
+        IncorrectParsing::CODE => IncorrectParsing::DETAILS,
+        IncorrectPattern::CODE => IncorrectPattern::DETAILS,
+        ExceedingMaxRange::CODE => ExceedingMaxRange::DETAILS,
+        ExceedingMinRange::CODE => ExceedingMinRange::DETAILS,
+        AlreadyExist::CODE => AlreadyExist::DETAILS,
+        NotFound::CODE => NotFound::DETAILS
+    ];
+}
 
-define('ErrorMessages', [
-    Success::CODE => Success::MESSAGE,
-    NullAttributes::CODE => NullAttributes::MESSAGE,
-    ExceedingMaxLength::CODE => ExceedingMaxLength::MESSAGE,
-    ExceedingMinLength::CODE => ExceedingMinLength::MESSAGE,
-    IncorrectParsing::CODE => IncorrectParsing::MESSAGE,
-    IncorrectPattern::CODE => IncorrectPattern::MESSAGE,
-    ExceedingMaxRange::CODE => ExceedingMaxRange::MESSAGE,
-    ExceedingMinRange::CODE => ExceedingMinRange::MESSAGE
-]);
-
-define('ErrorDetails', [
-    Success::CODE => Success::DETAILS,
-    NullAttributes::CODE => NullAttributes::DETAILS,
-    ExceedingMaxLength::CODE => ExceedingMaxLength::DETAILS,
-    ExceedingMinLength::CODE => ExceedingMinLength::DETAILS,
-    IncorrectParsing::CODE => IncorrectParsing::DETAILS,
-    IncorrectPattern::CODE => IncorrectPattern::DETAILS,
-    ExceedingMaxRange::CODE => ExceedingMaxRange::DETAILS,
-    ExceedingMinRange::CODE => ExceedingMinRange::DETAILS
-]);
 
 // ==== success case =====================================================================
 
@@ -110,4 +120,20 @@ interface ExceedingMinRange
     const CODE = 31;
     const MESSAGE = "integer exceed the minimum value";
     const DETAILS = 'the int-typed attribute exceeds the minimum permitted value';
+}
+
+// ==== elaboration invalid cases ========================================================
+
+interface AlreadyExist
+{
+    const CODE = 40;
+    const MESSAGE = "the entity already exist";
+    const DETAILS = 'the entity attributes already have this values';
+}
+
+interface NotFound
+{
+    const CODE = 41;
+    const MESSAGE = "the entity does not exist";
+    const DETAILS = "the elaboration parameters didn't produced any entity";
 }

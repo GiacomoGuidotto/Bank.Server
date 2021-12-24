@@ -3,9 +3,9 @@
 namespace Model\Transaction;
 
 use PHPUnit\Framework\TestCase;
-use Specifics\ErrorCases\IncorrectParsing;
-use Specifics\ErrorCases\IncorrectPattern;
-use Specifics\ErrorCases\NullAttributes;
+use Specifications\ErrorCases\IncorrectParsing;
+use Specifications\ErrorCases\IncorrectPattern;
+use Specifications\ErrorCases\NullAttributes;
 
 class TransactionImplTest extends TestCase
 {

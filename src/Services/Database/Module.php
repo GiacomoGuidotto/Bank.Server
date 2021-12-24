@@ -4,8 +4,7 @@ namespace Services\Database;
 
 use Exception;
 use PDO;
-use phpDocumentor\Reflection\Types\Array_;
-use Specifics\Database\DatabaseSpecifics;
+use Specifications\Database\Database;
 
 class Module
 {
@@ -19,9 +18,9 @@ class Module
     public function __construct()
     {
         $this->db = new PDO(
-            "mysql:host=" . DatabaseSpecifics::SERVER_NAME . ";dbname=" . DatabaseSpecifics::DATABASE_NAME,
-            DatabaseSpecifics::DATABASE_USER,
-            DatabaseSpecifics::DATABASE_USER_PASSWORD
+            "mysql:host=" . Database::SERVER_NAME . ";dbname=" . Database::DATABASE_NAME,
+            Database::DATABASE_USER,
+            Database::DATABASE_USER_PASSWORD
         );
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
@@ -60,7 +59,7 @@ class Module
         $statement = $this->db->prepare($query);
 
         if ($params != null) {
-            foreach ($params as $reference => $value) {
+            foreach ($params as $reference => &$value) {
                 $statement->bindParam($reference, $value);
             }
         }

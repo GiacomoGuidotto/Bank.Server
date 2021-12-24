@@ -3,8 +3,8 @@
 namespace Model\Deposit;
 
 use PHPUnit\Framework\TestCase;
-use Specifics\ErrorCases\IncorrectParsing;
-use Specifics\ErrorCases\NullAttributes;
+use Specifications\ErrorCases\IncorrectParsing;
+use Specifications\ErrorCases\NullAttributes;
 
 class DepositImplTest extends TestCase
 {

@@ -2,11 +2,11 @@
 
 namespace Model\User;
 
-use Specifics\ErrorCases\ExceedingMaxLength;
-use Specifics\ErrorCases\ExceedingMinLength;
-use Specifics\ErrorCases\IncorrectPattern;
-use Specifics\ErrorCases\NullAttributes;
-use Specifics\ErrorCases\Success;
+use Specifications\ErrorCases\ExceedingMaxLength;
+use Specifications\ErrorCases\ExceedingMinLength;
+use Specifications\ErrorCases\IncorrectPattern;
+use Specifications\ErrorCases\NullAttributes;
+use Specifications\ErrorCases\Success;
 
 /**
  * UserImpl Implementation, the representation of the user resource
