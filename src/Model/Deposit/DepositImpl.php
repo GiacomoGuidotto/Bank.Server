@@ -2,8 +2,6 @@
 
 namespace Model\Deposit;
 
-use Exception;
-use Model\Entity;
 use Specifics\ErrorCases\ExceedingMaxLength;
 use Specifics\ErrorCases\ExceedingMaxRange;
 use Specifics\ErrorCases\ExceedingMinLength;

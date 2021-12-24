@@ -2,8 +2,6 @@
 
 namespace Model\Transaction;
 
-use Exception;
-
 /**
  * Transaction Interface, declare specific methods
  * for the transaction resource
@@ -13,86 +11,38 @@ use Exception;
 interface Transaction
 {
     /**
-     * Get function for the database identifier
-     * of the transaction
+     * Checks the constrains of the transaction's type attribute
      *
-     * @return integer
+     * @param string $type the type to check
+     * @return int         either the error code
+     *                     or the success code
      */
-    public function getId(): int;
+    public static function validateType(string $type): int;
 
     /**
-     * Get function for the database identifier
-     * of the deposit linked to the transaction
+     * Checks the constrains of the transaction's amount attribute
      *
-     * @return int
+     * @param int $amount the amount to check
+     * @return int        either the error code
+     *                    or the success code
      */
-    public function getDepositId(): int;
+    public static function validateAmount(int $amount): int;
 
     /**
-     * Get function for the type of the transaction
+     * Checks the constrains of the transaction's timestamp attribute
      *
-     * @return string
+     * @param string $timestamp the amount to check
+     * @return int              either the error code
+     *                          or the success code
      */
-    public function getType(): string;
+    public static function validateTimestamp(string $timestamp): int;
 
     /**
-     * Set function for the type of the transaction
-     * Checks the constrains before assignation
+     * Checks the constrains of the transaction's author attribute
      *
-     * @param string $type
-     * @return Transaction
-     * @throws Exception
+     * @param string $author the author to check
+     * @return int           either the error code
+     *                       or the success code
      */
-    public function setType(string $type): Transaction;
-
-    /**
-     * Get function for the amount of the transaction
-     *
-     * @return int
-     */
-    public function getAmount(): int;
-
-    /**
-     * Set function for the amount of the transaction
-     * Checks the constrains before assignation
-     *
-     * @param int $amount
-     * @return Transaction
-     * @throws Exception
-     */
-    public function setAmount(int $amount): Transaction;
-
-    /**
-     * Get function for the moment of the transaction
-     *
-     * @return string
-     */
-    public function getTimestamp(): string;
-
-    /**
-     * Set function for the moment of the transaction
-     * Checks the constrains before assignation
-     *
-     * @param string $timestamp
-     * @return Transaction
-     * @throws Exception
-     */
-    public function setTimestamp(string $timestamp): Transaction;
-
-    /**
-     * Get function for the author of the transaction
-     *
-     * @return string
-     */
-    public function getAuthor(): string;
-
-    /**
-     * Set function for the author of the transaction
-     * Checks the constrains before assignation
-     *
-     * @param string $author
-     * @return Transaction
-     * @throws Exception
-     */
-    public function setAuthor(string $author): Transaction;
+    public static function validateAuthor(string $author): int;
 }
