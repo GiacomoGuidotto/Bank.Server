@@ -5,20 +5,50 @@
 
 namespace Specifics\ErrorCases;
 
-define('ErrorCodes', [
-    // success
-    00 => 'Success',
-    // generic
-    10 => 'NullAttributes',
-    // string-related
-    20 => 'ExceedingMaxLength',
-    21 => 'ExceedingMinLength',
-    22 => 'IncorrectParsing',
-    23 => 'IncorrectPattern',
-    // int-related
-    30 => 'ExceedingMaxRange',
-    31 => 'ExceedingMinRange'
+/**
+ * Error cases schemas:
+ * code, message, details
+ *
+ * ==== success case =========
+ * 00 Success
+ *
+ * ==== generic ==============
+ * 10 Null attributes
+ *
+ * ==== string-related =======
+ * 20 Exceeding max length
+ * 21 Exceeding min length
+ * 22 Incorrect parsing
+ * 23 Incorrect pattern
+ *
+ * ==== int-related ==========
+ * 30 Exceeding max range
+ * 31 Exceeding min range
+ */
+
+define('ErrorMessages', [
+    Success::CODE => Success::MESSAGE,
+    NullAttributes::CODE => NullAttributes::MESSAGE,
+    ExceedingMaxLength::CODE => ExceedingMaxLength::MESSAGE,
+    ExceedingMinLength::CODE => ExceedingMinLength::MESSAGE,
+    IncorrectParsing::CODE => IncorrectParsing::MESSAGE,
+    IncorrectPattern::CODE => IncorrectPattern::MESSAGE,
+    ExceedingMaxRange::CODE => ExceedingMaxRange::MESSAGE,
+    ExceedingMinRange::CODE => ExceedingMinRange::MESSAGE
 ]);
+
+define('ErrorDetails', [
+    Success::CODE => Success::DETAILS,
+    NullAttributes::CODE => NullAttributes::DETAILS,
+    ExceedingMaxLength::CODE => ExceedingMaxLength::DETAILS,
+    ExceedingMinLength::CODE => ExceedingMinLength::DETAILS,
+    IncorrectParsing::CODE => IncorrectParsing::DETAILS,
+    IncorrectPattern::CODE => IncorrectPattern::DETAILS,
+    ExceedingMaxRange::CODE => ExceedingMaxRange::DETAILS,
+    ExceedingMinRange::CODE => ExceedingMinRange::DETAILS
+]);
+
+// ==== success case =====================================================================
 
 interface Success
 {
@@ -27,7 +57,7 @@ interface Success
     const DETAILS = 'action completed';
 }
 
-// generic invalid cases
+// ==== generic invalid cases ============================================================
 
 interface NullAttributes
 {
@@ -36,7 +66,7 @@ interface NullAttributes
     const DETAILS = 'the attribute does not exist or is null';
 }
 
-// string invalid cases
+// ==== string invalid cases =============================================================
 
 interface ExceedingMaxLength
 {
@@ -66,7 +96,7 @@ interface IncorrectPattern
     const DETAILS = "the string-typed attribute doesn't follow the regex pattern";
 }
 
-// integer (32 bit) invalid cases
+// ==== integer (32 bit) invalid cases ===================================================
 
 interface ExceedingMaxRange
 {

@@ -4,6 +4,7 @@ namespace Services\Database;
 
 use Exception;
 use PDO;
+use phpDocumentor\Reflection\Types\Array_;
 use Specifics\Database\DatabaseSpecifics;
 
 class Module
@@ -50,11 +51,11 @@ class Module
      * with the optional parameters as array
      * of keys (the reference in the query) and values (its real value)
      *
-     * @param string $query
-     * @param array|null $params
-     * @return void
+     * @param string $query the query to execute
+     * @param array|null $params the optional parameters
+     * @return array the rows fetched
      */
-    public function executeQuery(string $query, array $params = null)
+    public function executeQuery(string $query, array $params = null): array
     {
         $statement = $this->db->prepare($query);
 
@@ -65,5 +66,7 @@ class Module
         }
 
         $statement->execute();
+
+        return $statement->fetchAll();
     }
 }

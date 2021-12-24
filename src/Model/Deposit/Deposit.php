@@ -10,7 +10,7 @@ namespace Model\Deposit;
 interface Deposit
 {
     /**
-     * Checks the constrains of the name attribute
+     * Checks the constrains of the deposit's name attribute
      *
      * @param string $name the name to check
      * @return int         either the error code
@@ -19,7 +19,7 @@ interface Deposit
     public static function validateName(string $name): int;
 
     /**
-     * Checks the constrains of the amount attribute
+     * Checks the constrains of the deposit's amount attribute
      *
      * @param int $amount the amount to check
      * @return int        either the error code
@@ -28,7 +28,7 @@ interface Deposit
     public static function validateAmount(int $amount): int;
 
     /**
-     * Checks the constrains of the type attribute
+     * Checks the constrains of the deposit's type attribute
      *
      * @param string $type the type to check
      * @return int         either the error code

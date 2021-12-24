@@ -58,7 +58,7 @@ class TransactionImpl implements Transaction
         if (strlen($timestamp) < 19) {
             return ExceedingMinLength::CODE;
         }
-//      // e.g. 2021-12-25 12:00:00
+        // e.g. 2021-12-25 12:00:00
         if (preg_match(
                 "#([0-9]{4})-(0[1-9]|1[1|2])-([0-2][0-9]|3[0|1]) ([0|1][0-9]|2[0-3])(:[0-5][0-9]){2}#",
                 $timestamp

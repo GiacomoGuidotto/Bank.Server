@@ -8,8 +8,6 @@ use Specifics\ErrorCases\NullAttributes;
 
 class DepositImplTest extends TestCase
 {
-
-
     public function testNullName()
     {
         $this->assertEquals(
