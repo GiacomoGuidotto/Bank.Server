@@ -2,8 +2,6 @@
 
 namespace Model\User;
 
-use Exception;
-
 /**
  * User Interface, declare specific methods for the user resource
  *
@@ -12,111 +10,47 @@ use Exception;
 interface User
 {
     /**
-     * Get function for the database identifier of the user
+     * Check the constrains of the username attribute
      *
-     * @return integer
+     * @param string $username the username to check
+     * @return int             either the error code
+     *                         or the success code
      */
-    public function getId(): int;
+    public static function validateUsername(string $username): int;
 
     /**
-     * Get function for the username of the user
+     * Check the constrains of the password attribute
      *
-     * @return string
+     * @param string $password the password to check
+     * @return int             either the error code
+     *                         or the success code
      */
-    public function getUsername(): string;
+    public static function validatePassword(string $password): int;
 
     /**
-     * Set function for the username of the user
-     * Checks the constrains before assignation
+     * Check the constrains of the name attribute
      *
-     * @param string $username
-     * @return self
-     * @throws Exception
+     * @param string $name the name to check
+     * @return int         either the error code
+     *                     or the success code
      */
-    public function setUsername(string $username): User;
+    public static function validateName(string $name): int;
 
     /**
-     * Get function for the password of the user
+     * Check the constrains of the surname attribute
      *
-     * @return string
+     * @param string $surname the surname to check
+     * @return int            either the error code
+     *                        or the success code
      */
-    public function getPassword(): string;
+    public static function validateSurname(string $surname): int;
 
     /**
-     * Set function for the password of the user
-     * Checks the constrains before assignation
+     * Check the constrains of the IBAN attribute
      *
-     * @param string $password
-     * @return self
-     * @throws Exception
+     * @param string $IBAN the IBAN to check
+     * @return int         either the error code
+     *                     or the success code
      */
-    public function setPassword(string $password): User;
-
-    /**
-     * Get function for the name of the user
-     *
-     * @return string
-     */
-    public function getName(): string;
-
-    /**
-     * Set function for the name of the user
-     * Checks the constrains before assignation
-     *
-     * @param string $name
-     * @return self
-     * @throws Exception
-     */
-    public function setName(string $name): User;
-
-    /**
-     * Get function for the surname of the user
-     *
-     * @return string
-     */
-    public function getSurname(): string;
-
-    /**
-     * Set function for the surname of the user
-     * Checks the constrains before assignation
-     *
-     * @param string $surname
-     * @return self
-     * @throws Exception
-     */
-    public function setSurname(string $surname): User;
-
-    /**
-     * Get function for the IBAN of the user
-     *
-     * @return string
-     */
-    public function getIBAN(): string;
-
-    /**
-     * Set function for the IBAN of the user
-     * Checks the constrains before assignation
-     *
-     * @param string $IBAN
-     * @return self
-     * @throws Exception
-     */
-    public function setIBAN(string $IBAN): User;
-
-    /**
-     * Get function for the active state of the user
-     *
-     * @return boolean
-     */
-    public function getActive(): bool;
-
-    /**
-     * Set function for the active state of the user
-     * Checks the constrains before assignation
-     *
-     * @param bool $active
-     * @return self
-     * @throws Exception
-     */
-    public function setActive(bool $active): User;
+    public static function validateIBAN(string $IBAN): int;
 }
