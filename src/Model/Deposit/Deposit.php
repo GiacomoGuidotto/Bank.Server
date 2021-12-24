@@ -12,87 +12,29 @@ use Exception;
 interface Deposit
 {
     /**
-     * Get function for the database identifier
-     * of the deposit
+     * Checks the constrains of the name attribute
      *
-     * @return integer
+     * @param string $name the name to check
+     * @return int         either the error code
+     *                     or the success code
      */
-    public function getId(): int;
+    public static function validateName(string $name): int;
 
     /**
-     * Get function for the database identifier
-     * of the user linked to the deposit
+     * Checks the constrains of the amount attribute
      *
-     * @return integer
+     * @param int $amount the amount to check
+     * @return int        either the error code
+     *                    or the success code
      */
-    public function getUserId(): int;
+    public static function validateAmount(int $amount): int;
 
     /**
-     * Get function for the name of the deposit
+     * Checks the constrains of the type attribute
      *
-     * @return string
+     * @param string $type the type to check
+     * @return int         either the error code
+     *                     or the success code
      */
-    public function getName(): string;
-
-    /**
-     * Set function for the name of the deposit
-     * Checks the constrains before assignation
-     *
-     * @param string $name
-     * @return self
-     * @throws Exception
-     */
-    public function setName(string $name): Deposit;
-
-    /**
-     * Get function for the amount of the deposit
-     *
-     * @return int
-     */
-    public function getAmount(): int;
-
-    /**
-     * Set function for the amount of the deposit
-     * Checks the constrains before assignation
-     *
-     * @param int $amount
-     * @return self
-     * @throws Exception
-     */
-    public function setAmount(int $amount): self;
-
-    /**
-     * Get function for the type of the deposit
-     *
-     * @return string
-     */
-    public function getType(): string;
-
-    /**
-     * Set function for the type of the deposit
-     * Checks the constrains before assignation
-     *
-     * @param string $type
-     * @return self
-     * @throws Exception
-     */
-    public function setType(string $type): Deposit;
-
-    /**
-     * Get function for the type of the deposit
-     *
-     * @return boolean
-     */
-    public function getActive(): bool;
-
-    /**
-     * Set function for the type of the deposit
-     * Checks the constrains before assignation
-     *
-     * @param boolean $active
-     * @return self
-     * @throws Exception
-     */
-    public function setActive(bool $active): self;
-
+    public static function validateType(string $type): int;
 }
