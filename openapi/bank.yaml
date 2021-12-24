@@ -108,10 +108,7 @@ paths:
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  IBAN:
-                    $ref: "#/components/schemas/userIBAN"
+                $ref: "#/components/schemas/userObject"
         400:
           $ref: "#/components/responses/400"
 

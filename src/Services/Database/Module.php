@@ -4,12 +4,9 @@ namespace Services\Database;
 
 use Exception;
 use PDO;
-use const Specifics\Database\DATABASE_NAME;
-use const Specifics\Database\DATABASE_USER;
-use const Specifics\Database\DATABASE_USER_PASSWORD;
-use const Specifics\Database\SERVER_NAME;
+use Specifics\Database\DatabaseSpecifics;
 
-class DatabaseModule
+class Module
 {
     private PDO $db;
 
@@ -21,9 +18,9 @@ class DatabaseModule
     public function __construct()
     {
         $this->db = new PDO(
-            "mysql:host=" . SERVER_NAME . ";dbname=" . DATABASE_NAME,
-            DATABASE_USER,
-            DATABASE_USER_PASSWORD
+            "mysql:host=" . DatabaseSpecifics::SERVER_NAME . ";dbname=" . DatabaseSpecifics::DATABASE_NAME,
+            DatabaseSpecifics::DATABASE_USER,
+            DatabaseSpecifics::DATABASE_USER_PASSWORD
         );
         $this->db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }

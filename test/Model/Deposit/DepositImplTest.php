@@ -15,6 +15,26 @@ class DepositImplTest extends TestCase
     /**
      * @throws Exception
      */
+    public function testCorrectInstance()
+    {
+        $testedUser = new DepositImpl(
+            1,
+            1,
+            'Deposit1',
+            22000,
+            'standard',
+            true
+        );
+
+        $this->assertInstanceOf(Deposit::class, $testedUser);
+
+        $this->validDeposit = $testedUser;
+    }
+
+
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->validDeposit = new DepositImpl(

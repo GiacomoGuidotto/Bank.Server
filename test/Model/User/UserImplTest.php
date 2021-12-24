@@ -17,6 +17,25 @@ class UserImplTest extends TestCase
     /**
      * @throws Exception
      */
+    public function testCorrectInstance()
+    {
+        $testedUser = new UserImpl(
+            1,
+            'john.doe',
+            '^@},hJu>[4Bo7TGX',
+            'John',
+            'Doe',
+            '000000000000000000000',
+            true);
+
+        $this->assertInstanceOf(User::class, $testedUser);
+
+        $this->validUser = $testedUser;
+    }
+
+    /**
+     * @throws Exception
+     */
     protected function setUp(): void
     {
         $this->validUser = new UserImpl(
