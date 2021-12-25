@@ -14,7 +14,6 @@ use Specifications\ErrorCases\NotFound;
 use Specifications\ErrorCases\Success;
 use Specifications\ErrorCases\Timeout;
 use Specifications\ErrorCases\Unauthorized;
-use function Composer\Autoload\includeFile;
 
 class ServiceImpl implements Service
 {
@@ -64,7 +63,7 @@ class ServiceImpl implements Service
         $storedPasswordRow = $this->module->fetchOne(
             'SELECT password 
                    FROM users 
-                   WHERE username = :username',
+                   WHERE username = :username AND active = TRUE',
             [
                 ':username' => $username
             ]
@@ -72,12 +71,14 @@ class ServiceImpl implements Service
 
         // ==== username not found ===============
         if (!$storedPasswordRow) {
+            $this->module->commitTransaction();
             return $this->generateErrorMessage(NotFound::CODE);
         }
 
         // ==== password incorrect ===============
         $storedPassword = $storedPasswordRow['password'];
         if (!password_verify($password, $storedPassword)) {
+            $this->module->commitTransaction();
             return $this->generateErrorMessage(NotFound::CODE);
         }
 
@@ -120,7 +121,6 @@ class ServiceImpl implements Service
         )['session_token'];
 
         $this->module->commitTransaction();
-
         return [
             'token' => $token
         ];
@@ -168,6 +168,7 @@ class ServiceImpl implements Service
         );
 
         if ($user) {
+            $this->module->commitTransaction();
             return $this->generateErrorMessage(AlreadyExist::CODE);
         }
 
@@ -210,7 +211,6 @@ class ServiceImpl implements Service
         );
 
         $this->module->commitTransaction();
-
         return [
             'username' => $username,
             'name' => $name,
@@ -220,6 +220,7 @@ class ServiceImpl implements Service
     }
 
     // ==== MZ - Militarized Zone ==============================================
+    // =========================================================================
 
     /**
      * Utility Method
@@ -238,6 +239,7 @@ class ServiceImpl implements Service
     }
 
     /**
+     * Utility method
      * Checks if the call exceeded the TTL duration
      *
      * @param string $currentTimestamp now
@@ -256,10 +258,7 @@ class ServiceImpl implements Service
                 $last_updated
             ));
 
-        if ($timeDifference > $timeToLive) {
-            return false;
-        }
-        return true;
+        return $timeDifference < $timeToLive;
     }
 
     /**
@@ -273,8 +272,10 @@ class ServiceImpl implements Service
      */
     private function authorizeToken(string $token): int
     {
+        // =======================================
         $this->module->beginTransaction();
 
+        // ==== Find token =======================
         $token_row = $this->module->fetchOne(
             'SELECT last_updated 
                    FROM sessions 
@@ -285,11 +286,11 @@ class ServiceImpl implements Service
         );
 
         if (!$token_row) {
+            $this->module->commitTransaction();
             return Unauthorized::CODE;
         }
 
         // ==== Update session TTL ===============
-
         $last_updated = $token_row['last_updated'];
 
         $current_timestamp = $this->module->fetchOne(
@@ -297,6 +298,7 @@ class ServiceImpl implements Service
         )['CURRENT_TIMESTAMP()'];
 
         if (!$this->validateTimeout($current_timestamp, $last_updated)) {
+            // ==== If timeout =======================
             $this->module->execute(
                 'UPDATE sessions
                        SET active = FALSE
@@ -305,11 +307,21 @@ class ServiceImpl implements Service
                     ':session_token' => $token
                 ]
             );
+
+            $this->module->commitTransaction();
             return Timeout::CODE;
         }
 
-        $this->module->commitTransaction();
+        $this->module->execute(
+            'UPDATE sessions
+                   SET last_updated = CURRENT_TIMESTAMP()
+                   WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        );
 
+        $this->module->commitTransaction();
         return Success::CODE;
     }
 
@@ -326,11 +338,15 @@ class ServiceImpl implements Service
             return $this->generateErrorMessage($tokenValidation);
         }
 
+        // ==== Token authorization ==============
         $tokenAuthorization = $this->authorizeToken($token);
 
         if ($tokenAuthorization != Success::CODE) {
             return $this->generateErrorMessage($tokenAuthorization);
         }
+
+        // =======================================
+        $this->module->beginTransaction();
 
         $user_id = $this->module->fetchOne(
             'SELECT user FROM sessions WHERE session_token = :session_token',
@@ -346,6 +362,7 @@ class ServiceImpl implements Service
             ]
         );
 
+        $this->module->commitTransaction();
         return [
             'username' => $user['username'],
             'name' => $user['name'],
@@ -361,7 +378,45 @@ class ServiceImpl implements Service
      */
     public function closeUser(string $token): array|null
     {
-        // TODO: Implement closeUser() method.
+        $tokenValidation = SessionImpl::validateToken($token);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+
+        // ==== Token authorization ==============
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        // =======================================
+        $this->module->beginTransaction();
+
+        $user_id = $this->module->fetchOne(
+            'SELECT user FROM sessions WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        )['user'];
+
+        var_dump($user_id);
+
+        $this->module->execute(
+            'UPDATE users
+                   SET active = 0
+                   WHERE user_id = :user_id',
+            [
+                ':user_id' => $user_id
+            ]
+        );
+
+        $this->module->commitTransaction();
+
+        // TODO call closeDeposits and closeLoans() methods on cascade
+        $this->closeSession($token);
+        return null;
     }
 
     // ==== Close a specific session ===========================================
@@ -371,7 +426,42 @@ class ServiceImpl implements Service
      */
     public function closeSession(string $token): array|null
     {
-        // TODO: Implement closeSession() method.
+        $tokenValidation = SessionImpl::validateToken($token);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+
+        // =======================================
+        $this->module->beginTransaction();
+
+        // ==== Find token =======================
+        $token_row = $this->module->fetchOne(
+            'SELECT last_updated 
+                   FROM sessions 
+                   WHERE session_token = :session_token AND active = TRUE',
+            [
+                ':session_token' => $token
+            ]
+        );
+
+        if (!$token_row) {
+            $this->module->commitTransaction();
+            return $this->generateErrorMessage(Unauthorized::CODE);
+        }
+
+        // ==== Disable token ====================
+        $this->module->execute(
+            'UPDATE sessions
+                   SET active = FALSE
+                   WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        );
+
+        $this->module->commitTransaction();
+        return null;
     }
 
     // ==== Get the deposit information ========================================

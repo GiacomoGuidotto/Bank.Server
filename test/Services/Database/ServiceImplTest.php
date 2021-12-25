@@ -11,26 +11,36 @@ use Specifications\ErrorCases\Success;
 class ServiceImplTest extends TestCase
 {
     protected ServiceImpl $service;
+    protected string $validUsername = 'giacomo.guidotto';
+    protected string $validPassword = 'Fr6/ese342f';
+    protected string $validToken;
 
-    private function generateString(
-        int    $length = 8,
-        string $prefix = '',
-        string $suffix = '',
-        bool   $withDigits = false
-    ): string
+    /**
+     * Utility method
+     * generate a random string for attribute testing
+     *
+     * @param int $length the optional string length
+     * @return string the generated string
+     */
+    private function generateString(int $length = 8): string
     {
-        $characters = ($withDigits ? '0123456789' : '') . 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        $characters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
         $charactersLength = strlen($characters);
         $randomString = '';
         for ($i = 0; $i < $length; $i++) {
             $randomString .= $characters[rand(0, $charactersLength - 1)];
         }
-        return $prefix . $randomString . $suffix;
+        return $randomString;
     }
 
     protected function setUp(): void
     {
         $this->service = new ServiceImpl();
+
+//        $this->validToken = $this->service->authenticate(
+//            $this->validUsername,
+//            $this->validPassword
+//        )['token'];
     }
 
     // ==== Authenticate =======================================================
@@ -38,11 +48,13 @@ class ServiceImplTest extends TestCase
     public function testTokenGeneration()
     {
         $testedToken = $this->service->authenticate(
-            'giacomo.guidotto',
-            'Fr6/ese342f'
+            $this->validUsername,
+            $this->validPassword
         );
 
         var_dump($testedToken);
+
+        $this->validToken = $testedToken['token'];
 
         self::assertEquals(
             Success::CODE,
@@ -55,13 +67,15 @@ class ServiceImplTest extends TestCase
 
     public function testUserCreation()
     {
-        $generatedUsername = $this->generateString();
+        $generatedUsername = $this->generateString(12);
+        $generatedName = $this->generateString();
+        $generatedSurname = $this->generateString();
 
         $testedArray = $this->service->createUser(
             $generatedUsername,
-            'Fr6/ese342f',
-            'Giacomo',
-            'Guidotto',
+            $this->validPassword,
+            $generatedName,
+            $generatedSurname,
         );
 
         var_dump($testedArray);
@@ -71,11 +85,11 @@ class ServiceImplTest extends TestCase
             $testedArray['username']
         );
         self::assertEquals(
-            'Giacomo',
+            $generatedName,
             $testedArray['name']
         );
         self::assertEquals(
-            'Guidotto',
+            $generatedSurname,
             $testedArray['surname']
         );
         self::assertEquals(
@@ -110,10 +124,12 @@ class ServiceImplTest extends TestCase
         var_dump($testedArray);
     }
 
+    // ==== Get the user information ===========================================
+
     public function testUserInformation()
     {
         $testedArray = $this->service->getUser(
-            'f8200e66-65ac-11ec-be32-525400b8ef1f'
+            'fe3d8244-65bc-11ec-be32-525400b8ef1f'
         );
 
         var_dump($testedArray);
@@ -134,5 +150,38 @@ class ServiceImplTest extends TestCase
             Success::CODE,
             UserImpl::validateIBAN($testedArray['IBAN'])
         );
+    }
+
+    // ==== Close a specific user ==============================================
+
+    public function testCloseUser()
+    {
+        $dummyToken = $this->service->authenticate(
+            'PAxklAYmLbtM',
+            $this->validPassword
+        );
+
+        var_dump($dummyToken);
+
+        $testedArray = $this->service->closeUser(
+            $dummyToken['token']
+        );
+
+        var_dump($testedArray);
+
+        self::assertNull($testedArray);
+    }
+
+    // ==== Close a specific session ===========================================
+
+    public function testCloseSession()
+    {
+        $testedArray = $this->service->closeUser(
+            $this->validToken
+        );
+
+        var_dump($testedArray);
+
+        self::assertNull($testedArray);
     }
 }
