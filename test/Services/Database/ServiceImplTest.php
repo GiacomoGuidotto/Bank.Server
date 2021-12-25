@@ -37,10 +37,10 @@ class ServiceImplTest extends TestCase
     {
         $this->service = new ServiceImpl();
 
-//        $this->validToken = $this->service->authenticate(
-//            $this->validUsername,
-//            $this->validPassword
-//        )['token'];
+        $this->validToken = $this->service->authenticate(
+            $this->validUsername,
+            $this->validPassword
+        )['token'];
     }
 
     // ==== Authenticate =======================================================
@@ -129,7 +129,7 @@ class ServiceImplTest extends TestCase
     public function testUserInformation()
     {
         $testedArray = $this->service->getUser(
-            'fe3d8244-65bc-11ec-be32-525400b8ef1f'
+            $this->validToken
         );
 
         var_dump($testedArray);
@@ -157,7 +157,7 @@ class ServiceImplTest extends TestCase
     public function testCloseUser()
     {
         $dummyToken = $this->service->authenticate(
-            'PAxklAYmLbtM',
+            'LSkfOBdyPVfF',
             $this->validPassword
         );
 
@@ -176,7 +176,7 @@ class ServiceImplTest extends TestCase
 
     public function testCloseSession()
     {
-        $testedArray = $this->service->closeUser(
+        $testedArray = $this->service->closeSession(
             $this->validToken
         );
 
