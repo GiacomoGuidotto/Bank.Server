@@ -4,6 +4,7 @@ namespace Services\Database;
 
 use Exception;
 use PDO;
+use PDOStatement;
 use Specifications\Database\Database;
 
 class Module
@@ -48,13 +49,13 @@ class Module
     /**
      * Execute the query passed as parameters
      * with the optional parameters as array
-     * of keys (the reference in the query) and values (its real value)
+     * and return the statement ready to be fetched
      *
      * @param string $query the query to execute
      * @param array|null $params the optional parameters
-     * @return array the rows fetched
+     * @return bool|PDOStatement the statement
      */
-    public function executeQuery(string $query, array $params = null): array
+    private function executeQuery(string $query, array $params = null): bool|PDOStatement
     {
         $statement = $this->db->prepare($query);
 
@@ -66,6 +67,51 @@ class Module
 
         $statement->execute();
 
+        return $statement;
+    }
+
+    /**
+     * Execute the query passed as parameters
+     * with the optional parameters as array
+     * and return the first row fetched
+     *
+     * @param string $query the query to execute
+     * @param array|null $params the optional parameters
+     * @return array|false the set of attributes in the row, false in case of empty
+     */
+    public function fetchOne(string $query, array $params = null): array|false
+    {
+        $statement = $this->executeQuery($query, $params);
+
+        return $statement->fetch();
+    }
+
+    /**
+     * Execute the query passed as parameters
+     * with the optional parameters as array
+     * and return all the rows fetched
+     *
+     * @param string $query the query to execute
+     * @param array|null $params the optional parameters
+     * @return array|false the list of row, false in case of empty
+     */
+    public function fetchAll(string $query, array $params = null): array|false
+    {
+        $statement = $this->executeQuery($query, $params);
+
         return $statement->fetchAll();
+    }
+
+    /**
+     * Execute the query passed as parameters
+     * with the optional parameters as array
+     * and doesn't return the result
+     *
+     * @param string $query the query to execute
+     * @param array|null $params the optional parameters
+     */
+    public function execute(string $query, array $params = null): void
+    {
+        $this->executeQuery($query, $params);
     }
 }

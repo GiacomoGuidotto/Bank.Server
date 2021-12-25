@@ -28,6 +28,8 @@ namespace Specifications\ErrorCases;
  * ==== elaboration-related ====
  * 40 Already exist
  * 41 Not found
+ * 42 Unauthorized
+ * 43 Timeout
  */
 interface ErrorCases
 {
@@ -41,7 +43,9 @@ interface ErrorCases
         ExceedingMaxRange::CODE => ExceedingMaxRange::MESSAGE,
         ExceedingMinRange::CODE => ExceedingMinRange::MESSAGE,
         AlreadyExist::CODE => AlreadyExist::MESSAGE,
-        NotFound::CODE => NotFound::MESSAGE
+        NotFound::CODE => NotFound::MESSAGE,
+        Unauthorized::CODE => Unauthorized::MESSAGE,
+        Timeout::CODE => Timeout::MESSAGE
     ];
     const ERROR_DETAILS = [
         Success::CODE => Success::DETAILS,
@@ -53,7 +57,9 @@ interface ErrorCases
         ExceedingMaxRange::CODE => ExceedingMaxRange::DETAILS,
         ExceedingMinRange::CODE => ExceedingMinRange::DETAILS,
         AlreadyExist::CODE => AlreadyExist::DETAILS,
-        NotFound::CODE => NotFound::DETAILS
+        NotFound::CODE => NotFound::DETAILS,
+        Unauthorized::CODE => Unauthorized::DETAILS,
+        Timeout::CODE => Timeout::DETAILS
     ];
 }
 
@@ -136,4 +142,18 @@ interface NotFound
     const CODE = 41;
     const MESSAGE = "the entity does not exist";
     const DETAILS = "the elaboration parameters didn't produced any entity";
+}
+
+interface Unauthorized
+{
+    const CODE = 42;
+    const MESSAGE = "the session token does not exist";
+    const DETAILS = "the session token served doesn't exist, impossible to confirm authority";
+}
+
+interface Timeout
+{
+    const CODE = 43;
+    const MESSAGE = "the session has expired";
+    const DETAILS = "the time to live of the session token ended";
 }

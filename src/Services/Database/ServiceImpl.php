@@ -2,12 +2,19 @@
 
 namespace Services\Database;
 
+use DateInterval;
+use JetBrains\PhpStorm\ArrayShape;
+use Model\Session\SessionImpl;
 use Model\User\UserImpl;
 use Specifications\Bank\Bank;
+use Specifications\Database\Database;
 use Specifications\ErrorCases\AlreadyExist;
 use Specifications\ErrorCases\ErrorCases;
 use Specifications\ErrorCases\NotFound;
 use Specifications\ErrorCases\Success;
+use Specifications\ErrorCases\Timeout;
+use Specifications\ErrorCases\Unauthorized;
+use function Composer\Autoload\includeFile;
 
 class ServiceImpl implements Service
 {
@@ -18,7 +25,12 @@ class ServiceImpl implements Service
         $this->module = new Module();
     }
 
-    private function generateErrorMessage(int $code): array
+    #[ArrayShape([
+        'timestamp' => "string",
+        'error' => "int",
+        'message' => "string",
+        'details' => "string"
+    ])] private function generateErrorMessage(int $code): array
     {
         return [
             'timestamp' => date('Y-m-d H:i:s'),
@@ -49,53 +61,63 @@ class ServiceImpl implements Service
         $this->module->beginTransaction();
 
         // ==== correct username and password ====
-        $storedPasswordRow = $this->module->executeQuery('
-            SELECT password 
-            FROM users 
-            WHERE username = :username',
+        $storedPasswordRow = $this->module->fetchOne(
+            'SELECT password 
+                   FROM users 
+                   WHERE username = :username',
             [
                 ':username' => $username
             ]
         );
 
         // ==== username not found ===============
-        if (count($storedPasswordRow) != 1) {
+        if (!$storedPasswordRow) {
             return $this->generateErrorMessage(NotFound::CODE);
         }
 
         // ==== password incorrect ===============
-        $storedPassword = $storedPasswordRow[0]['password'];
+        $storedPassword = $storedPasswordRow['password'];
         if (!password_verify($password, $storedPassword)) {
             return $this->generateErrorMessage(NotFound::CODE);
         }
 
-        // ==== create token =====================
-        $userId = $this->module->executeQuery('
-            SELECT user_id FROM users WHERE username = :username
-        ',
+        $userId = $this->module->fetchOne(
+            'SELECT user_id FROM users WHERE username = :username',
             [
                 ':username' => $username
-            ])[0]['user_id'];
+            ]
+        )['user_id'];
 
+        // ==== delete token already existing ====
+        $this->module->execute(
+            'UPDATE sessions
+                   SET active = FALSE
+                   WHERE user = :user_id',
+            [
+                ':user_id' => $userId
+            ]
+        );
 
-        $this->module->executeQuery('
-            INSERT INTO sessions (session_token, user, creation_timestamp, last_updated, active)
-            VALUES (
-                    UUID(),
-                    :user_id,
-                    CURRENT_TIMESTAMP(),
-                    CURRENT_TIMESTAMP(),
-                    :active
-            ) 
-        ',
+        // ==== create token =====================
+        $this->module->execute(
+            'INSERT 
+                   INTO sessions (session_token, user, creation_timestamp, last_updated, active)
+                   VALUES (
+                        UUID(),
+                        :user_id,
+                        CURRENT_TIMESTAMP(),
+                        CURRENT_TIMESTAMP(),
+                        :active
+                   )',
             [
                 ':user_id' => $userId,
                 ':active' => true
-            ]);
+            ]
+        );
 
-        $token = $this->module->executeQuery('
-            SELECT session_token FROM sessions WHERE session_id = LAST_INSERT_ID()
-        ')[0]['session_token'];
+        $token = $this->module->fetchOne(
+            'SELECT session_token FROM sessions WHERE session_id = LAST_INSERT_ID()'
+        )['session_token'];
 
         $this->module->commitTransaction();
 
@@ -138,21 +160,21 @@ class ServiceImpl implements Service
         $this->module->beginTransaction();
 
         // ==== Already exist checks =============
-        $user = $this->module->executeQuery(
+        $user = $this->module->fetchOne(
             'SELECT username, name FROM users WHERE username = :username',
             [
                 ':username' => $username
             ]
         );
 
-        if (count($user) != 0) {
+        if ($user) {
             return $this->generateErrorMessage(AlreadyExist::CODE);
         }
 
         // ==== IBAN resolution ==================
-        $lastId = $this->module->executeQuery(
+        $lastId = $this->module->fetchOne(
             'SELECT MAX(user_id) FROM users'
-        )[0][0];
+        )['MAX(user_id)'];
         $accountNumber = str_pad($lastId, 12, '0', STR_PAD_LEFT);
         $IBAN =
             Bank::COUNTRY_CODE .
@@ -166,16 +188,17 @@ class ServiceImpl implements Service
         $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
 
         // ==== Insert query =====================
-        $this->module->executeQuery('
-            INSERT INTO users (username, password, name, surname, IBAN, active)
-            VALUES (
-                    :username,
-                    :password,
-                    :name,
-                    :surname,
-                    :IBAN,
-                    :active
-            )',
+        $this->module->execute(
+            'INSERT 
+                   INTO users (username, password, name, surname, IBAN, active)
+                   VALUES (
+                        :username,
+                        :password,
+                        :name,
+                        :surname,
+                        :IBAN,
+                        :active
+                   )',
             [
                 ':username' => $username,
                 ':password' => $hashedPassword,
@@ -196,6 +219,100 @@ class ServiceImpl implements Service
         ];
     }
 
+    // ==== MZ - Militarized Zone ==============================================
+
+    /**
+     * Utility Method
+     * Calculate the time different between two date in full-time format
+     *
+     * @param string $finalTime the final time
+     * @param string $initialTime the initial time
+     * @return DateInterval the time difference in full-time format
+     */
+    private function timeDifference(string $finalTime, string $initialTime): DateInterval
+    {
+        $finalDate = date_create($finalTime);
+        $initialDate = date_create($initialTime);
+
+        return $finalDate->diff($initialDate, true);
+    }
+
+    /**
+     * Checks if the call exceeded the TTL duration
+     *
+     * @param string $currentTimestamp now
+     * @param string $last_updated the moment of the last call
+     * @return bool the result, true if still in time
+     */
+    private function validateTimeout(string $currentTimestamp, string $last_updated): bool
+    {
+        $timeToLive = date_create('midnight')
+            ->add(DateInterval::createFromDateString(
+                Database::SESSION_DURATION
+            ));
+        $timeDifference = date_create('midnight')
+            ->add($this->timeDifference(
+                $currentTimestamp,
+                $last_updated
+            ));
+
+        if ($timeDifference > $timeToLive) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * Validate the existence of the token
+     * AND update the last_updated attribute
+     * IF it does not exceeded the token duration
+     *
+     * @param string $token the token to verify
+     * @return int          either the error code
+     *                      or the success code
+     */
+    private function authorizeToken(string $token): int
+    {
+        $this->module->beginTransaction();
+
+        $token_row = $this->module->fetchOne(
+            'SELECT last_updated 
+                   FROM sessions 
+                   WHERE session_token = :session_token AND active = TRUE',
+            [
+                ':session_token' => $token
+            ]
+        );
+
+        if (!$token_row) {
+            return Unauthorized::CODE;
+        }
+
+        // ==== Update session TTL ===============
+
+        $last_updated = $token_row['last_updated'];
+
+        $current_timestamp = $this->module->fetchOne(
+            'SELECT CURRENT_TIMESTAMP()'
+        )['CURRENT_TIMESTAMP()'];
+
+        if (!$this->validateTimeout($current_timestamp, $last_updated)) {
+            $this->module->execute(
+                'UPDATE sessions
+                       SET active = FALSE
+                       WHERE session_token = :session_token',
+                [
+                    ':session_token' => $token
+                ]
+            );
+            return Timeout::CODE;
+        }
+
+        $this->module->commitTransaction();
+
+        return Success::CODE;
+    }
+
     // ==== Get the user information ===========================================
 
     /**
@@ -203,7 +320,38 @@ class ServiceImpl implements Service
      */
     public function getUser(string $token): array
     {
-        // TODO: Implement getUser() method.
+        $tokenValidation = SessionImpl::validateToken($token);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        $user_id = $this->module->fetchOne(
+            'SELECT user FROM sessions WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        )['user'];
+
+        $user = $this->module->fetchOne(
+            'SELECT username, name, surname, IBAN FROM users WHERE user_id = :user_id',
+            [
+                ':user_id' => $user_id
+            ]
+        );
+
+        return [
+            'username' => $user['username'],
+            'name' => $user['name'],
+            'surname' => $user['surname'],
+            'IBAN' => $user['IBAN']
+        ];
     }
 
     // ==== Close a specific user ==============================================

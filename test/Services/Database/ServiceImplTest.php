@@ -43,7 +43,7 @@ class ServiceImplTest extends TestCase
         );
 
         var_dump($testedToken);
-        
+
         self::assertEquals(
             Success::CODE,
             SessionImpl::validateToken($testedToken['token'])
@@ -64,6 +64,8 @@ class ServiceImplTest extends TestCase
             'Guidotto',
         );
 
+        var_dump($testedArray);
+
         self::assertEquals(
             $generatedUsername,
             $testedArray['username']
@@ -81,7 +83,6 @@ class ServiceImplTest extends TestCase
             UserImpl::validateIBAN($testedArray['IBAN'])
         );
 
-        var_dump($testedArray);
     }
 
     public function testUsernameAlreadyExist()
@@ -107,5 +108,31 @@ class ServiceImplTest extends TestCase
         );
 
         var_dump($testedArray);
+    }
+
+    public function testUserInformation()
+    {
+        $testedArray = $this->service->getUser(
+            'f8200e66-65ac-11ec-be32-525400b8ef1f'
+        );
+
+        var_dump($testedArray);
+
+        self::assertEquals(
+            Success::CODE,
+            UserImpl::validateUsername($testedArray['username'])
+        );
+        self::assertEquals(
+            Success::CODE,
+            UserImpl::validateName($testedArray['name'])
+        );
+        self::assertEquals(
+            Success::CODE,
+            UserImpl::validateSurname($testedArray['surname'])
+        );
+        self::assertEquals(
+            Success::CODE,
+            UserImpl::validateIBAN($testedArray['IBAN'])
+        );
     }
 }
