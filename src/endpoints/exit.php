@@ -5,22 +5,20 @@ require '../../vendor/autoload.php';
 use Services\Database\ServiceImpl;
 use Specifications\ErrorCases\ExceedingMaxLength;
 use Specifications\ErrorCases\ExceedingMinLength;
-use Specifications\ErrorCases\IncorrectPattern;
-use Specifications\ErrorCases\NotFound;
 use Specifications\ErrorCases\NullAttributes;
+use Specifications\ErrorCases\Unauthorized;
 
 $codesAssociations = [
     NullAttributes::CODE => 400,
     ExceedingMaxLength::CODE => 400,
     ExceedingMinLength::CODE => 400,
-    IncorrectPattern::CODE => 400,
-    NotFound::CODE => 404
+    Unauthorized::CODE => 401,
 ];
 
 $service = new ServiceImpl();
 
 // ==== Invalid methods checks =====================================================
-$validMethods = ['GET'];
+$validMethods = ['DELETE'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 if (!in_array($method, $validMethods)) {
@@ -30,14 +28,13 @@ if (!in_array($method, $validMethods)) {
 
 // =================================================================================
 // ==== GET case ===================================================================
-if ($method == 'GET') {
+if ($method == 'DELETE') {
 
     // ==== get parameters =========================================================
-    $username = getallheaders()['username'];
-    $password = getallheaders()['password'];
+    $token = getallheaders()['token'];
 
     // ==== Null check =============================================================
-    if ($username == null || $password == null) {
+    if ($token == null) {
         http_response_code($codesAssociations[NullAttributes::CODE]);
         echo json_encode(
             $service->generateErrorMessage(NullAttributes::CODE)
@@ -46,7 +43,7 @@ if ($method == 'GET') {
     }
 
     // ==== Elaboration ============================================================
-    $result = $service->authenticate($username, $password);
+    $result = $service->closeSession($token);
 
     // ==== Error case =============================================================
     if ($result['error'] != null) {
@@ -56,6 +53,5 @@ if ($method == 'GET') {
     }
 
     // ==== Success case ===========================================================
-    echo json_encode($result);
     return;
 }

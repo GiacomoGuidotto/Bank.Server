@@ -472,6 +472,7 @@ class ServiceImpl implements Service
     public function getDeposits(string $token, string $name = null): array
     {
         // TODO: Implement getDeposits() method.
+        return [];
     }
 
     // ==== Open a new deposit =================================================
@@ -482,6 +483,7 @@ class ServiceImpl implements Service
     public function createDeposit(string $token, string $name, string $type, int $amount): array
     {
         // TODO: Implement createDeposit() method.
+        return [];
     }
 
     // ==== Freeze a specific deposit ==========================================
@@ -492,6 +494,7 @@ class ServiceImpl implements Service
     public function closeDeposit(string $token, string $name, string $destinationDeposit): array
     {
         // TODO: Implement closeDeposit() method.
+        return [];
     }
 
     // ==== Update the deposit amount ==========================================
@@ -502,6 +505,7 @@ class ServiceImpl implements Service
     public function updateDeposit(string $token, string $name, string $action, int $amount): array
     {
         // TODO: Implement updateDeposit() method.
+        return [];
     }
 
     // ==== Get the deposit's transaction history ==============================
@@ -512,6 +516,7 @@ class ServiceImpl implements Service
     public function getHistory(string $token, string $name): array
     {
         // TODO: Implement getHistory() method.
+        return [];
     }
 
     // ==== get the loans information ==========================================
@@ -522,6 +527,7 @@ class ServiceImpl implements Service
     public function getLoans(string $token, string $name = null): array
     {
         // TODO: Implement getLoans() method.
+        return [];
     }
 
     // ==== Open a new loan ====================================================
@@ -532,6 +538,7 @@ class ServiceImpl implements Service
     public function createLoan(string $token, string $deposit, string $name, string $amountAsked, string $repaymentDay, string $type): array
     {
         // TODO: Implement createLoan() method.
+        return [];
     }
 
     // ==== Conclude a specific loan ===========================================
@@ -542,5 +549,6 @@ class ServiceImpl implements Service
     public function closeLoan(string $token, string $name): array
     {
         // TODO: Implement closeLoan() method.
+        return [];
     }
 }
