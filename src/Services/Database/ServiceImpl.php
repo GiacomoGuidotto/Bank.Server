@@ -29,7 +29,7 @@ class ServiceImpl implements Service
         'error' => "int",
         'message' => "string",
         'details' => "string"
-    ])] private function generateErrorMessage(int $code): array
+    ])] public function generateErrorMessage(int $code): array
     {
         return [
             'timestamp' => date('Y-m-d H:i:s'),

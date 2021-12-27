@@ -30,6 +30,7 @@ namespace Specifications\ErrorCases;
  * 41 Not found
  * 42 Unauthorized
  * 43 Timeout
+ * 44 Bad parameters
  */
 interface ErrorCases
 {
@@ -45,7 +46,8 @@ interface ErrorCases
         AlreadyExist::CODE => AlreadyExist::MESSAGE,
         NotFound::CODE => NotFound::MESSAGE,
         Unauthorized::CODE => Unauthorized::MESSAGE,
-        Timeout::CODE => Timeout::MESSAGE
+        Timeout::CODE => Timeout::MESSAGE,
+        BadParameters::CODE => BadParameters::MESSAGE
     ];
     const ERROR_DETAILS = [
         Success::CODE => Success::DETAILS,
@@ -59,7 +61,8 @@ interface ErrorCases
         AlreadyExist::CODE => AlreadyExist::DETAILS,
         NotFound::CODE => NotFound::DETAILS,
         Unauthorized::CODE => Unauthorized::DETAILS,
-        Timeout::CODE => Timeout::DETAILS
+        Timeout::CODE => Timeout::DETAILS,
+        BadParameters::CODE => BadParameters::DETAILS
     ];
 }
 
@@ -156,4 +159,11 @@ interface Timeout
     const CODE = 43;
     const MESSAGE = "the session has expired";
     const DETAILS = "the time to live of the session token ended";
+}
+
+interface BadParameters
+{
+    const CODE = 44;
+    const MESSAGE = "the parameters are not valid";
+    const DETAILS = "the given parameters are either NULL or generally invalid";
 }
