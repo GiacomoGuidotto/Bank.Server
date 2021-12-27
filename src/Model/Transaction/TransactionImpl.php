@@ -7,7 +7,6 @@ use Specifications\ErrorCases\ExceedingMaxRange;
 use Specifications\ErrorCases\ExceedingMinLength;
 use Specifications\ErrorCases\IncorrectParsing;
 use Specifications\ErrorCases\IncorrectPattern;
-use Specifications\ErrorCases\NullAttributes;
 use Specifications\ErrorCases\Success;
 
 class TransactionImpl implements Transaction
@@ -19,9 +18,6 @@ class TransactionImpl implements Transaction
     {
         $enum = ['withdraw', 'deposit'];
 
-        if ($type == null) {
-            return NullAttributes::CODE;
-        }
         if (!in_array($type, $enum, true)) {
             return IncorrectParsing::CODE;
         }
@@ -34,9 +30,6 @@ class TransactionImpl implements Transaction
      */
     public static function validateAmount(int $amount): int
     {
-        if ($amount == null) {
-            return NullAttributes::CODE;
-        }
         if ($amount > 2 ** 31 - 1) {
             return ExceedingMaxRange::CODE;
         }
@@ -49,9 +42,6 @@ class TransactionImpl implements Transaction
      */
     public static function validateTimestamp(string $timestamp): int
     {
-        if ($timestamp == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($timestamp) > 19) {
             return ExceedingMaxLength::CODE;
         }
@@ -74,9 +64,6 @@ class TransactionImpl implements Transaction
      */
     public static function validateAuthor(string $author): int
     {
-        if ($author == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($author) > 129) {
             return ExceedingMaxLength::CODE;
         }

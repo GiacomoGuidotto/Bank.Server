@@ -6,18 +6,9 @@ use PHPUnit\Framework\TestCase;
 use Specifications\ErrorCases\ExceedingMaxLength;
 use Specifications\ErrorCases\ExceedingMinLength;
 use Specifications\ErrorCases\IncorrectPattern;
-use Specifications\ErrorCases\NullAttributes;
 
 class UserImplTest extends TestCase
 {
-    public function testNullUsername()
-    {
-        $this->assertEquals(
-            NullAttributes::CODE,
-            UserImpl::validateUsername('')
-        );
-    }
-
     public function testPasswordTooShort()
     {
         $this->assertEquals(

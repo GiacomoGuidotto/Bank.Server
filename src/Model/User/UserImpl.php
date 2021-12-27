@@ -5,7 +5,6 @@ namespace Model\User;
 use Specifications\ErrorCases\ExceedingMaxLength;
 use Specifications\ErrorCases\ExceedingMinLength;
 use Specifications\ErrorCases\IncorrectPattern;
-use Specifications\ErrorCases\NullAttributes;
 use Specifications\ErrorCases\Success;
 
 /**
@@ -22,9 +21,6 @@ class UserImpl implements User
      */
     public static function validateUsername(string $username): int
     {
-        if ($username == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($username) > 64) {
             return ExceedingMaxLength::CODE;
         }
@@ -40,9 +36,6 @@ class UserImpl implements User
      */
     public static function validatePassword(string $password): int
     {
-        if ($password == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($password) > 32) {
             return ExceedingMaxLength::CODE;
         }
@@ -61,9 +54,6 @@ class UserImpl implements User
      */
     public static function validateName(string $name): int
     {
-        if ($name == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($name) > 64) {
             return ExceedingMaxLength::CODE;
         }
@@ -79,9 +69,6 @@ class UserImpl implements User
      */
     public static function validateSurname(string $surname): int
     {
-        if ($surname == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($surname) > 64) {
             return ExceedingMaxLength::CODE;
         }
@@ -97,10 +84,6 @@ class UserImpl implements User
      */
     public static function validateIBAN(string $IBAN): int
     {
-        // IBAN checks
-        if ($IBAN == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($IBAN) > 32) {
             return ExceedingMaxLength::CODE;
         }

@@ -6,18 +6,9 @@ use PHPUnit\Framework\TestCase;
 use Specifications\ErrorCases\ExceedingMaxRange;
 use Specifications\ErrorCases\IncorrectParsing;
 use Specifications\ErrorCases\IncorrectPattern;
-use Specifications\ErrorCases\NullAttributes;
 
 class LoanImplTest extends TestCase
 {
-    public function testNullName()
-    {
-        $this->assertEquals(
-            NullAttributes::CODE,
-            LoanImpl::validateName('')
-        );
-    }
-
     public function testIncorrectInterestRate()
     {
         $this->assertEquals(

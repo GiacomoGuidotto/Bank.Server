@@ -7,7 +7,6 @@ use Specifications\ErrorCases\ExceedingMaxRange;
 use Specifications\ErrorCases\ExceedingMinLength;
 use Specifications\ErrorCases\ExceedingMinRange;
 use Specifications\ErrorCases\IncorrectParsing;
-use Specifications\ErrorCases\NullAttributes;
 use Specifications\ErrorCases\Success;
 
 class DepositImpl implements Deposit
@@ -17,9 +16,6 @@ class DepositImpl implements Deposit
      */
     public static function validateName(string $name): int
     {
-        if ($name == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($name) > 64) {
             return ExceedingMaxLength::CODE;
         }
@@ -35,9 +31,6 @@ class DepositImpl implements Deposit
      */
     public static function validateAmount(int $amount): int
     {
-        if ($amount == null) {
-            return NullAttributes::CODE;
-        }
         if ($amount > 2 ** 31 - 1) {
             return ExceedingMaxRange::CODE;
         }
@@ -55,9 +48,6 @@ class DepositImpl implements Deposit
     {
         $enum = ['standard'];
 
-        if ($type == null) {
-            return NullAttributes::CODE;
-        }
         if (!in_array($type, $enum, true)) {
             return IncorrectParsing::CODE;
         }

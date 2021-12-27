@@ -73,8 +73,12 @@ paths:
                 properties:
                   Token:
                     $ref: "#/components/parameters/sessionToken"
+        400:
+          $ref: "#/components/responses/400"
         404:
           $ref: "#/components/responses/404"
+        405:
+          $ref: "#/components/responses/405"
 
   /user:
     post:
@@ -111,6 +115,8 @@ paths:
                 $ref: "#/components/schemas/userObject"
         400:
           $ref: "#/components/responses/400"
+        405:
+          $ref: "#/components/responses/405"
 
     # MZ
     get:
@@ -132,6 +138,8 @@ paths:
           $ref: "#/components/responses/401"
         403:
           $ref: "#/components/responses/403"
+        405:
+          $ref: "#/components/responses/405"
 
     delete:
       operationId: closeUser
@@ -150,6 +158,8 @@ paths:
           $ref: "#/components/responses/401"
         403:
           $ref: "#/components/responses/403"
+        405:
+          $ref: "#/components/responses/405"
 
   /exit:
     delete:
@@ -167,6 +177,8 @@ paths:
           $ref: "#/components/responses/400"
         401:
           $ref: "#/components/responses/401"
+        405:
+          $ref: "#/components/responses/405"
 
   /deposit:
     get:
@@ -204,6 +216,8 @@ paths:
           $ref: "#/components/responses/401"
         403:
           $ref: "#/components/responses/403"
+        405:
+          $ref: "#/components/responses/405"
 
     post:
       operationId: createDeposit
@@ -233,6 +247,8 @@ paths:
           $ref: "#/components/responses/400"
         401:
           $ref: "#/components/responses/401"
+        405:
+          $ref: "#/components/responses/405"
 
     delete:
       operationId: closeDeposit
@@ -267,6 +283,8 @@ paths:
           $ref: "#/components/responses/403"
         404:
           $ref: "#/components/responses/404"
+        405:
+          $ref: "#/components/responses/405"
         406:
           $ref: "#/components/responses/406"
 
@@ -313,6 +331,8 @@ paths:
           $ref: "#/components/responses/403"
         404:
           $ref: "#/components/responses/404"
+        405:
+          $ref: "#/components/responses/405"
 
   /history:
     get:
@@ -341,6 +361,8 @@ paths:
           $ref: "#/components/responses/403"
         404:
           $ref: "#/components/responses/404"
+        405:
+          $ref: "#/components/responses/405"
 
   /loan:
     get:
@@ -388,6 +410,8 @@ paths:
           $ref: "#/components/responses/401"
         403:
           $ref: "#/components/responses/403"
+        405:
+          $ref: "#/components/responses/405"
 
     post:
       operationId: createLoan
@@ -423,6 +447,8 @@ paths:
           $ref: "#/components/responses/400"
         401:
           $ref: "#/components/responses/401"
+        405:
+          $ref: "#/components/responses/405"
 
     delete:
       operationId: closeLoan
@@ -452,6 +478,8 @@ paths:
           $ref: "#/components/responses/403"
         404:
           $ref: "#/components/responses/404"
+        405:
+          $ref: "#/components/responses/405"
         406:
           $ref: "#/components/responses/406"
 
@@ -505,6 +533,12 @@ components:
             $ref: "#/components/schemas/errorMessage"
     404:
       description: the entity does not exist
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/errorMessage"
+    405:
+      description: the method used is not allowed
       content:
         application/json:
           schema:

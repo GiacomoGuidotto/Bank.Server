@@ -5,7 +5,6 @@ namespace Model\Session;
 use Specifications\ErrorCases\ExceedingMaxLength;
 use Specifications\ErrorCases\ExceedingMinLength;
 use Specifications\ErrorCases\IncorrectPattern;
-use Specifications\ErrorCases\NullAttributes;
 use Specifications\ErrorCases\Success;
 
 class SessionImpl implements Session
@@ -16,9 +15,6 @@ class SessionImpl implements Session
      */
     public static function validateToken(string $token): int
     {
-        if ($token == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($token) > 36) {
             return ExceedingMaxLength::CODE;
         }
@@ -34,9 +30,6 @@ class SessionImpl implements Session
      */
     public static function validateCreationTimestamp(string $timestamp): int
     {
-        if ($timestamp == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($timestamp) > 19) {
             return ExceedingMaxLength::CODE;
         }
@@ -59,9 +52,6 @@ class SessionImpl implements Session
      */
     public static function validateLastUpdated(string $timestamp): int
     {
-        if ($timestamp == null) {
-            return NullAttributes::CODE;
-        }
         if (strlen($timestamp) > 19) {
             return ExceedingMaxLength::CODE;
         }
