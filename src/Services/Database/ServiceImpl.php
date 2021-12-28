@@ -4,13 +4,18 @@ namespace Services\Database;
 
 use DateInterval;
 use JetBrains\PhpStorm\ArrayShape;
+use Model\Deposit\DepositImpl;
 use Model\Session\SessionImpl;
 use Model\User\UserImpl;
 use Specifications\Bank\Bank;
 use Specifications\Database\Database;
 use Specifications\ErrorCases\AlreadyExist;
 use Specifications\ErrorCases\ErrorCases;
+use Specifications\ErrorCases\Forbidden;
+use Specifications\ErrorCases\InvalidDepositAmount;
+use Specifications\ErrorCases\InvalidDestinationDeposit;
 use Specifications\ErrorCases\NotFound;
+use Specifications\ErrorCases\NullAttributes;
 use Specifications\ErrorCases\Success;
 use Specifications\ErrorCases\Timeout;
 use Specifications\ErrorCases\Unauthorized;
@@ -161,7 +166,9 @@ class ServiceImpl implements Service
 
         // ==== Already exist checks =============
         $user = $this->module->fetchOne(
-            'SELECT username, name FROM users WHERE username = :username',
+            'SELECT username, name 
+                   FROM users 
+                   WHERE username = :username AND active = TRUE',
             [
                 ':username' => $username
             ]
@@ -403,7 +410,7 @@ class ServiceImpl implements Service
 
         $this->module->execute(
             'UPDATE users
-                   SET active = 0
+                   SET active = FALSE
                    WHERE user_id = :user_id',
             [
                 ':user_id' => $user_id
@@ -467,10 +474,84 @@ class ServiceImpl implements Service
     /**
      * @inheritDoc
      */
-    public function getDeposits(string $token, string $name = null): array
+    public function getDeposits(string $token, string|null $name): array
     {
-        // TODO: Implement getDeposits() method.
-        return [];
+        $tokenValidation = SessionImpl::validateToken($token);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+
+        // ==== Token authorization ==============
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        // =======================================
+        $this->module->beginTransaction();
+
+        $user_id = $this->module->fetchOne(
+            'SELECT user FROM sessions WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        )['user'];
+
+        // ==== fetch the entire list ============
+        if ($name == null) {
+            $deposits = $this->module->fetchAll(
+                'SELECT name, amount, type 
+                       FROM deposits
+                       WHERE user = :user AND active = TRUE',
+                [
+                    ':user' => $user_id
+                ]
+            );
+
+            $this->module->commitTransaction();
+
+            // ==== deposit lists not found ======
+            if (!$deposits) {
+                return $this->generateErrorMessage(Forbidden::CODE);
+            }
+
+            $refactoredDeposits = [];
+
+            foreach ($deposits as $deposit) {
+                array_push($refactoredDeposits, [
+                    'name' => $deposit['name'],
+                    'amount' => $deposit['amount'],
+                    'type' => $deposit['type']
+                ]);
+            }
+
+            return $refactoredDeposits;
+        } else {
+            $deposit = $this->module->fetchOne(
+                'SELECT name, amount, type 
+                       FROM deposits
+                       WHERE user = :user AND name = :name AND active = TRUE',
+                [
+                    ':user' => $user_id,
+                    ':name' => $name
+                ]
+            );
+
+            $this->module->commitTransaction();
+
+            // ==== deposit lists not found ======
+            if (!$deposit) {
+                return $this->generateErrorMessage(Forbidden::CODE);
+            }
+
+            return [
+                'name' => $deposit['name'],
+                'amount' => $deposit['amount'],
+                'type' => $deposit['type']
+            ];
+        }
     }
 
     // ==== Open a new deposit =================================================
@@ -478,10 +559,97 @@ class ServiceImpl implements Service
     /**
      * @inheritDoc
      */
-    public function createDeposit(string $token, string $name, string $type, int $amount): array
+    public function createDeposit(string $token, string $name, string $type, int|null $amount): array
     {
-        // TODO: Implement createDeposit() method.
-        return [];
+        $tokenValidation = SessionImpl::validateToken($token);
+        $nameValidation = DepositImpl::validateName($name);
+        $typeValidation = DepositImpl::validateType($type);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+        if ($nameValidation != Success::CODE) {
+            return $this->generateErrorMessage($nameValidation);
+        }
+        if ($typeValidation != Success::CODE) {
+            return $this->generateErrorMessage($typeValidation);
+        }
+
+        // ==== Amount for saving deposit check ====
+
+        if ($type == 'saving' && $amount == null) {
+            return $this->generateErrorMessage(NullAttributes::CODE);
+        }
+
+        if ($type == 'saving' && $amount < Bank::MINIMUM_SAVING_AMOUNT) {
+            return $this->generateErrorMessage(InvalidDepositAmount::CODE);
+        }
+
+        $refactoredAmount = $amount ?? 0;
+        $amountValidation = DepositImpl::validateAmount($refactoredAmount);
+
+        if ($amountValidation != Success::CODE) {
+            return $this->generateErrorMessage($amountValidation);
+        }
+
+        // ==== Token authorization ==============
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        // =========================================
+        $this->module->beginTransaction();
+
+        // ==== Already exist checks ===============
+        $deposit = $this->module->fetchOne(
+            'SELECT name 
+                   FROM deposits 
+                   WHERE name = :name AND active = TRUE',
+            [
+                ':name' => $name
+            ]
+        );
+
+        if ($deposit) {
+            $this->module->commitTransaction();
+            return $this->generateErrorMessage(AlreadyExist::CODE);
+        }
+
+        // ==== Elaboration ========================
+        $user_id = $this->module->fetchOne(
+            'SELECT user FROM sessions WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        )['user'];
+
+        $this->module->execute(
+            'INSERT 
+                   INTO deposits (name, amount, type, user, active) 
+                   VALUES (
+                           :name,
+                           :amount,
+                           :type,
+                           :user,
+                           :active
+                   )',
+            [
+                ':name' => $name,
+                ':amount' => $refactoredAmount,
+                ':type' => $type,
+                ':user' => $user_id,
+                ':active' => true
+            ]
+        );
+
+        $this->module->commitTransaction();
+        return [
+            'name' => $name,
+            'amount' => $refactoredAmount,
+            'type' => $type
+        ];
     }
 
     // ==== Freeze a specific deposit ==========================================
@@ -491,8 +659,97 @@ class ServiceImpl implements Service
      */
     public function closeDeposit(string $token, string $name, string $destinationDeposit): array
     {
-        // TODO: Implement closeDeposit() method.
-        return [];
+        $tokenValidation = SessionImpl::validateToken($token);
+        $nameValidation = DepositImpl::validateName($name);
+        $destinationDepositValidation = DepositImpl::validateName($destinationDeposit);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+        if ($nameValidation != Success::CODE) {
+            return $this->generateErrorMessage($nameValidation);
+        }
+        if ($destinationDepositValidation != Success::CODE) {
+            return $this->generateErrorMessage($destinationDepositValidation);
+        }
+
+        // ==== Token authorization ==============
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        // =======================================
+        $this->module->beginTransaction();
+
+        $user_id = $this->module->fetchOne(
+            'SELECT user FROM sessions WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        )['user'];
+
+        // ==== Find destination deposit =========
+        $destinationDepositRow = $this->module->fetchOne(
+            'SELECT amount 
+                   FROM deposits
+                   WHERE user = :user AND name = :destination AND active = TRUE',
+            [
+                ':user' => $user_id,
+                'destination' => $destinationDeposit
+            ]
+        );
+
+        // ==== Destination deposit not found ====
+        if (!$destinationDepositRow) {
+            $this->module->commitTransaction();
+            return $this->generateErrorMessage(InvalidDestinationDeposit::CODE);
+        }
+
+        $destinationDepositAmount = $destinationDepositRow['amount'];
+
+        // ==== Find deposit to delete ===========
+        $depositRow = $this->module->fetchOne(
+            'SELECT amount
+                   FROM deposits
+                   WHERE user = :user AND name = :name AND active = TRUE',
+            [
+                ':user' => $user_id,
+                ':name' => $name
+            ]
+        );
+
+        // ==== Deposit to delete not found ======
+        if (!$depositRow) {
+            $this->module->commitTransaction();
+            return $this->generateErrorMessage(Forbidden::CODE);
+        }
+
+        $depositAmount = $depositRow['amount'];
+
+        // ==== Elaboration ======================
+        $this->module->execute(
+            'UPDATE deposits
+                   SET amount = :amount
+                   WHERE name = :destination',
+            [
+                ':amount' => $destinationDepositAmount + $depositAmount,
+                ':destination' => $destinationDeposit
+            ]
+        );
+
+        $this->module->execute(
+            'UPDATE deposits
+                   SET active = FALSE
+                   WHERE name = :name',
+            [
+                ':name' => $name
+            ]
+        );
+
+        $this->module->commitTransaction();
+        return $this->getDeposits($token, null);
     }
 
     // ==== Update the deposit amount ==========================================

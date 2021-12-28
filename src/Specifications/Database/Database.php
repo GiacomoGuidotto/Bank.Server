@@ -9,5 +9,5 @@ interface Database
     const DATABASE_USER = 'giacomo';
     const DATABASE_USER_PASSWORD = '';
 
-    const SESSION_DURATION = '05 minutes';
+    const SESSION_DURATION = '15 minutes';
 }

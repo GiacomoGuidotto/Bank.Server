@@ -97,7 +97,7 @@ interface Service
      * @return array the list of deposits or the single
      *               deposit saved in an array as object
      */
-    public function getDeposits(string $token, string $name = null): array;
+    public function getDeposits(string $token, string|null $name): array;
 
     // ==== Open a new deposit =================================================
 
@@ -111,16 +111,16 @@ interface Service
      *                     extracted from the request
      * @param string $type the deposit type
      *                     extracted from the request
-     * @param int $amount the deposit amount
-     *                    extracted from the request
+     * @param int|null $amount the conditional deposit initial amount
+     *                         extracted from the request
      * @return array the public attributes of the deposit
      *               saved in an array as a object
      */
     public function createDeposit(
-        string $token,
-        string $name,
-        string $type,
-        int    $amount
+        string   $token,
+        string   $name,
+        string   $type,
+        int|null $amount
     ): array;
 
     // ==== Freeze a specific deposit ==========================================

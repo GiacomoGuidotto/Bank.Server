@@ -11,4 +11,6 @@ interface Bank
     const COUNTRY_CODE = 'IT';
     const BANK_CODE = '25836';
     const BRANCH_CODE = '37592';
+
+    const MINIMUM_SAVING_AMOUNT = 0;
 }

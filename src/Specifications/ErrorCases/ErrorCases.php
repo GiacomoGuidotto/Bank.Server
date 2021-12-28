@@ -25,11 +25,17 @@ namespace Specifications\ErrorCases;
  * 30 Exceeding max range
  * 31 Exceeding min range
  *
- * ==== elaboration-related ====
+ * ==== state-related ==========
  * 40 Already exist
  * 41 Not found
  * 42 Unauthorized
  * 43 Timeout
+ * 44 Forbidden
+ *
+ * ==== elaboration-related ====
+ * 50 Invalid deposit amount
+ * 51 Invalid destination deposit
+ *
  */
 interface ErrorCases
 {
@@ -44,7 +50,10 @@ interface ErrorCases
         AlreadyExist::CODE => 409,
         NotFound::CODE => 404,
         Unauthorized::CODE => 401,
-        Timeout::CODE => 401
+        Timeout::CODE => 401,
+        Forbidden::CODE => 403,
+        InvalidDepositAmount::CODE => 406,
+        InvalidDestinationDeposit::CODE => 406
     ];
 
     const ERROR_MESSAGES = [
@@ -60,6 +69,9 @@ interface ErrorCases
         NotFound::CODE => NotFound::MESSAGE,
         Unauthorized::CODE => Unauthorized::MESSAGE,
         Timeout::CODE => Timeout::MESSAGE,
+        Forbidden::CODE => Forbidden::MESSAGE,
+        InvalidDepositAmount::CODE => InvalidDepositAmount::MESSAGE,
+        InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::MESSAGE
     ];
     const ERROR_DETAILS = [
         Success::CODE => Success::DETAILS,
@@ -74,6 +86,9 @@ interface ErrorCases
         NotFound::CODE => NotFound::DETAILS,
         Unauthorized::CODE => Unauthorized::DETAILS,
         Timeout::CODE => Timeout::DETAILS,
+        Forbidden::CODE => Forbidden::DETAILS,
+        InvalidDepositAmount::CODE => InvalidDepositAmount::DETAILS,
+        InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::DETAILS
     ];
 }
 
@@ -142,7 +157,7 @@ interface ExceedingMinRange
     const DETAILS = 'the int-typed attribute exceeds the minimum permitted value';
 }
 
-// ==== elaboration invalid cases ========================================================
+// ==== state management invalid cases ===================================================
 
 interface AlreadyExist
 {
@@ -170,4 +185,27 @@ interface Timeout
     const CODE = 43;
     const MESSAGE = "the session has expired";
     const DETAILS = "the time to live of the session token ended";
+}
+
+interface Forbidden
+{
+    const CODE = 44;
+    const MESSAGE = "the entity doesn't belong to the user";
+    const DETAILS = "the searched entity isn't of this user property";
+}
+
+// ==== specifics elaborations invalid cases =============================================
+
+interface InvalidDepositAmount
+{
+    const CODE = 50;
+    const MESSAGE = "the initial amount is invalid";
+    const DETAILS = "the given amount is too low for a saving account";
+}
+
+interface InvalidDestinationDeposit
+{
+    const CODE = 51;
+    const MESSAGE = "the deposit of destination is invalid";
+    const DETAILS = "the deposit targeted as destination doesn't exist";
 }

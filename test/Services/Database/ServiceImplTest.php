@@ -2,6 +2,7 @@
 
 namespace Services\Database;
 
+use Model\Deposit\DepositImpl;
 use Model\Session\SessionImpl;
 use Model\User\UserImpl;
 use PHPUnit\Framework\TestCase;
@@ -52,7 +53,7 @@ class ServiceImplTest extends TestCase
             $this->validPassword
         );
 
-        var_dump($testedToken);
+        echo json_encode($testedToken, JSON_PRETTY_PRINT);
 
         $this->validToken = $testedToken['token'];
 
@@ -78,7 +79,7 @@ class ServiceImplTest extends TestCase
             $generatedSurname,
         );
 
-        var_dump($testedArray);
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
 
         self::assertEquals(
             $generatedUsername,
@@ -121,7 +122,7 @@ class ServiceImplTest extends TestCase
             $testedArray['details']
         );
 
-        var_dump($testedArray);
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
     }
 
     // ==== Get the user information ===========================================
@@ -132,7 +133,7 @@ class ServiceImplTest extends TestCase
             $this->validToken
         );
 
-        var_dump($testedArray);
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
 
         self::assertEquals(
             Success::CODE,
@@ -157,17 +158,17 @@ class ServiceImplTest extends TestCase
     public function testCloseUser()
     {
         $dummyToken = $this->service->authenticate(
-            'LSkfOBdyPVfF',
+            'gSqwFKJnKRiY',
             $this->validPassword
         );
 
-        var_dump($dummyToken);
+        echo json_encode($dummyToken, JSON_PRETTY_PRINT);
 
         $testedArray = $this->service->closeUser(
             $dummyToken['token']
         );
 
-        var_dump($testedArray);
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
 
         self::assertNull($testedArray);
     }
@@ -180,8 +181,89 @@ class ServiceImplTest extends TestCase
             $this->validToken
         );
 
-        var_dump($testedArray);
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
 
         self::assertNull($testedArray);
+    }
+
+    // ==== Open a new deposit =================================================
+
+    public function testDepositCreation()
+    {
+        $generatedName = $this->generateString();
+
+        $testedArray = $this->service->createDeposit(
+            $this->validToken,
+            $generatedName,
+            'standard',
+            null
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+        self::assertEquals(
+            $generatedName,
+            $testedArray['name']
+        );
+        self::assertEquals(
+            'standard',
+            $testedArray['type']
+        );
+        self::assertEquals(
+            0,
+            $testedArray['amount']
+        );
+    }
+
+    // ==== Get the deposit information ========================================
+
+    public function testGetDepositList()
+    {
+        $testedArray = $this->service->getDeposits(
+            $this->validToken,
+            null
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+        self::assertNotEmpty($testedArray);
+    }
+
+    public function testGetDeposit()
+    {
+        $testedArray = $this->service->getDeposits(
+            $this->validToken,
+            'lYIQRiRA'
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+        self::assertEquals(
+            Success::CODE,
+            DepositImpl::validateName($testedArray['name'])
+        );
+        self::assertEquals(
+            Success::CODE,
+            DepositImpl::validateAmount($testedArray['amount'])
+        );
+        self::assertEquals(
+            Success::CODE,
+            DepositImpl::validateType($testedArray['type'])
+        );
+    }
+
+    // ==== Freeze a specific deposit ==========================================
+
+    public function testDeleteDeposit()
+    {
+        $testedArray = $this->service->closeDeposit(
+            $this->validToken,
+            'lYIQRiRA',
+            'kgiOOVUS'
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+        self::assertNotEmpty($testedArray);
     }
 }
