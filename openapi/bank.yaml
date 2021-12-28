@@ -117,6 +117,8 @@ paths:
           $ref: "#/components/responses/400"
         405:
           $ref: "#/components/responses/405"
+        409:
+          $ref: "#/components/responses/409"
 
     # MZ
     get:
@@ -136,8 +138,6 @@ paths:
           $ref: "#/components/responses/400"
         401:
           $ref: "#/components/responses/401"
-        403:
-          $ref: "#/components/responses/403"
         405:
           $ref: "#/components/responses/405"
 
@@ -156,8 +156,6 @@ paths:
           $ref: "#/components/responses/400"
         401:
           $ref: "#/components/responses/401"
-        403:
-          $ref: "#/components/responses/403"
         405:
           $ref: "#/components/responses/405"
 
@@ -545,6 +543,12 @@ components:
             $ref: "#/components/schemas/errorMessage"
     406:
       description: the elaboration of the request failed
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/errorMessage"
+    409:
+      description: the entity unique attributes already exist
       content:
         application/json:
           schema:

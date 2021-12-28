@@ -24,7 +24,7 @@ class UserImpl implements User
         if (strlen($username) > 64) {
             return ExceedingMaxLength::CODE;
         }
-        if (strlen($username) < 1) {
+        if (strlen($username) < 8) {
             return ExceedingMinLength::CODE;
         }
 

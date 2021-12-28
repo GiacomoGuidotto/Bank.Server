@@ -3,24 +3,13 @@
 require '../../vendor/autoload.php';
 
 use Services\Database\ServiceImpl;
-use Specifications\ErrorCases\ExceedingMaxLength;
-use Specifications\ErrorCases\ExceedingMinLength;
-use Specifications\ErrorCases\IncorrectPattern;
-use Specifications\ErrorCases\NotFound;
+use Specifications\ErrorCases\ErrorCases;
 use Specifications\ErrorCases\NullAttributes;
-
-$codesAssociations = [
-    NullAttributes::CODE => 400,
-    ExceedingMaxLength::CODE => 400,
-    ExceedingMinLength::CODE => 400,
-    IncorrectPattern::CODE => 400,
-    NotFound::CODE => 404
-];
 
 $service = new ServiceImpl();
 
 // ==== Invalid methods checks =====================================================
-$validMethods = ['GET', 'POST', 'DELETE'];
+$validMethods = ['POST', 'GET', 'DELETE'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 if (!in_array($method, $validMethods)) {
@@ -30,19 +19,96 @@ if (!in_array($method, $validMethods)) {
 
 
 // =================================================================================
-// ==== GET case ===================================================================
-if ($method == 'GET') {
+// ==== POST case ===================================================================
+if ($method == 'POST') {
+
+    // ==== get parameters =========================================================
+    $username = getallheaders()['username'];
+    $password = getallheaders()['password'];
+    $name = getallheaders()['name'];
+    $surname = getallheaders()['surname'];
+
+    // ==== Null check =============================================================
+    if ($username == null || $password == null || $name == null || $surname == null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[NullAttributes::CODE]);
+        echo json_encode(
+            $service->generateErrorMessage(NullAttributes::CODE)
+        );
+        return;
+    }
+
+    // ==== Elaboration ============================================================
+    $result = $service->createUser($username, $password, $name, $surname);
+
+    // ==== Error case =============================================================
+    if ($result['error'] != null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[$result['error']]);
+        echo json_encode($result);
+        return;
+    }
+
+    // ==== Success case ===========================================================
+    echo json_encode($result);
     return;
 }
 
 // =================================================================================
-// ==== POST case ===================================================================
-if ($method == 'POST') {
+// ==== GET case ===================================================================
+if ($method == 'GET') {
+
+    // ==== get parameters =========================================================
+    $token = getallheaders()['token'];
+
+    // ==== Null check =============================================================
+    if ($token == null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[NullAttributes::CODE]);
+        echo json_encode(
+            $service->generateErrorMessage(NullAttributes::CODE)
+        );
+        return;
+    }
+
+    // ==== Elaboration ============================================================
+    $result = $service->getUser($token);
+
+    // ==== Error case =============================================================
+    if ($result['error'] != null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[$result['error']]);
+        echo json_encode($result);
+        return;
+    }
+
+    // ==== Success case ===========================================================
+    echo json_encode($result);
     return;
 }
 
 // =================================================================================
 // ==== DELETE case ===================================================================
 if ($method == 'DELETE') {
+
+    // ==== get parameters =========================================================
+    $token = getallheaders()['token'];
+
+    // ==== Null check =============================================================
+    if ($token == null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[NullAttributes::CODE]);
+        echo json_encode(
+            $service->generateErrorMessage(NullAttributes::CODE)
+        );
+        return;
+    }
+
+    // ==== Elaboration ============================================================
+    $result = $service->closeUser($token);
+
+    // ==== Error case =============================================================
+    if ($result['error'] != null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[$result['error']]);
+        echo json_encode($result);
+        return;
+    }
+
+    // ==== Success case ===========================================================
     return;
 }

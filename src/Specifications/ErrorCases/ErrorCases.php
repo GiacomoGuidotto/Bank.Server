@@ -33,6 +33,20 @@ namespace Specifications\ErrorCases;
  */
 interface ErrorCases
 {
+    const CODES_ASSOCIATIONS = [
+        NullAttributes::CODE => 400,
+        ExceedingMaxLength::CODE => 400,
+        ExceedingMinLength::CODE => 400,
+        IncorrectParsing::CODE => 400,
+        IncorrectPattern::CODE => 400,
+        ExceedingMaxRange::CODE => 400,
+        ExceedingMinRange::CODE => 400,
+        AlreadyExist::CODE => 409,
+        NotFound::CODE => 404,
+        Unauthorized::CODE => 401,
+        Timeout::CODE => 401
+    ];
+
     const ERROR_MESSAGES = [
         Success::CODE => Success::MESSAGE,
         NullAttributes::CODE => NullAttributes::MESSAGE,

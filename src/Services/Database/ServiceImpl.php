@@ -401,8 +401,6 @@ class ServiceImpl implements Service
             ]
         )['user'];
 
-        var_dump($user_id);
-
         $this->module->execute(
             'UPDATE users
                    SET active = 0
