@@ -1,11 +1,11 @@
 _type: export
 __export_format: 4
-__export_date: 2021-12-29T10:43:24.208Z
+__export_date: 2021-12-29T12:46:17.306Z
 __export_source: insomnia.desktop.app:v2021.7.2
 resources:
   - _id: req_956d6b783ff94a1cb77b9372c91e21a7
     parentId: fld_af1420f20b474db5b17a9592ace88f2e
-    modified: 1640771421657
+    modified: 1640781937067
     created: 1640607744833
     url: "{{ _.auth }}"
     name: 200 OK
@@ -83,7 +83,7 @@ resources:
     _type: request
   - _id: req_4859a92b99334dad8a726d5eb24b9f35
     parentId: fld_af1420f20b474db5b17a9592ace88f2e
-    modified: 1640615580071
+    modified: 1640779830363
     created: 1640612206309
     url: "{{ _.auth }}"
     name: 404 Invalid username
@@ -94,7 +94,7 @@ resources:
     headers:
       - id: pair_5e80064b083c417fb2ca82b1b388bb94
         name: username
-        value: giacomo
+        value: giacomo guidotto
         description: ""
       - id: pair_e8a5a29409e2419ba6acadeba419bfcd
         name: password
@@ -1059,7 +1059,7 @@ resources:
     _type: request_group
   - _id: req_21807c053d7248069a94476057c6fe38
     parentId: fld_31d71c91cf9c4ecea6e8c905d1ad3d72
-    modified: 1640774440925
+    modified: 1640781528093
     created: 1640772498555
     url: "{{ _.deposit }}"
     name: 200 OK of the specific
@@ -1166,7 +1166,7 @@ resources:
     _type: request
   - _id: req_bcbb85f4504444fcabe122fcbdfd3987
     parentId: fld_31d71c91cf9c4ecea6e8c905d1ad3d72
-    modified: 1640774461920
+    modified: 1640779804934
     created: 1640774454113
     url: "{{ _.deposit }}"
     name: 404 Unknown deposit
@@ -1408,7 +1408,7 @@ resources:
     _type: request
   - _id: req_1b1b4c2c12a74988bb431f8ee5c56098
     parentId: fld_2289bd48b5e54c7a93636994fec55fb8
-    modified: 1640774568817
+    modified: 1640779795494
     created: 1640773731117
     url: "{{ _.deposit }}"
     name: 404 Unknown deposit
@@ -1545,13 +1545,13 @@ resources:
     _type: request
   - _id: fld_1268963785d9450fa3501e3574225843
     parentId: wrk_c36c82708d144ae8a143684ef5697fdb
-    modified: 1640773896561
+    modified: 1640776280642
     created: 1640773883121
     name: Update the deposit amount
     description: ""
     environment: {}
     environmentPropertyOrder: null
-    metaSortKey: -1639934370446.25
+    metaSortKey: -1639934370448.5938
     _type: request_group
   - _id: req_e5f16c19f7ea4e868ff69542754db8f0
     parentId: fld_1268963785d9450fa3501e3574225843
@@ -1706,7 +1706,7 @@ resources:
     _type: request
   - _id: req_9229ecaded244afdbc05f1befe6a61cd
     parentId: fld_1268963785d9450fa3501e3574225843
-    modified: 1640774426301
+    modified: 1640781689165
     created: 1640774419796
     url: "{{ _.deposit }}"
     name: 404 Unknown deposit
@@ -1743,7 +1743,7 @@ resources:
     _type: request
   - _id: req_35cae06d7354415f9ebdb30b77b16691
     parentId: fld_1268963785d9450fa3501e3574225843
-    modified: 1640774389124
+    modified: 1640781687991
     created: 1640774385145
     url: "{{ _.deposit }}"
     name: 405 Invalid method
@@ -1812,9 +1812,338 @@ resources:
     settingRebuildPath: true
     settingFollowRedirects: global
     _type: request
+  - _id: req_f357ec723cf541969e748b572e3f1d4a
+    parentId: fld_ca2d0319dee74626ae2ae84f19ec5ac1
+    modified: 1640776436688
+    created: 1640776261874
+    url: "{{ _.user }}"
+    name: Create dummy user
+    description: ""
+    method: POST
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_5e80064b083c417fb2ca82b1b388bb94
+        name: username
+        value: test_user
+        description: ""
+      - id: pair_e8a5a29409e2419ba6acadeba419bfcd
+        name: password
+        value: Fr6/ese342f
+        description: ""
+        disabled: false
+      - id: pair_344ca5f28daf4d88b8ab05a7b3e65ed1
+        name: name
+        value: Test
+        description: ""
+      - id: pair_2a5373b775904cd58ff774ae5dd37af2
+        name: surname
+        value: User
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744883
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_ca2d0319dee74626ae2ae84f19ec5ac1
+    parentId: wrk_c36c82708d144ae8a143684ef5697fdb
+    modified: 1640781478217
+    created: 1640776261814
+    name: Close a specific user with deposits
+    description: ""
+    environment: {}
+    environmentPropertyOrder: {}
+    metaSortKey: -1639934370448.3984
+    _type: request_group
+  - _id: req_3ada17a2d01540149552809ef4410f7f
+    parentId: fld_ca2d0319dee74626ae2ae84f19ec5ac1
+    modified: 1640776261877
+    created: 1640776261877
+    url: "{{ _.auth }}"
+    name: Get the dummy token
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_5e80064b083c417fb2ca82b1b388bb94
+        name: username
+        value: test_user
+        description: ""
+      - id: pair_e8a5a29409e2419ba6acadeba419bfcd
+        name: password
+        value: Fr6/ese342f
+        description: ""
+        disabled: false
+    authentication: {}
+    metaSortKey: -1640607744858
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_bd9d91f53a2b4b2e929d0efb6bc627a9
+    parentId: fld_ca2d0319dee74626ae2ae84f19ec5ac1
+    modified: 1640779854802
+    created: 1640776338141
+    url: "{{ _.deposit }}"
+    name: Create dummy deposits
+    description: ""
+    method: POST
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_5e80064b083c417fb2ca82b1b388bb94
+        name: token
+        value: 5b87f578-68a0-11ec-8d98-525400b8ef1f
+        description: ""
+      - id: pair_e8a5a29409e2419ba6acadeba419bfcd
+        name: name
+        value: test_user deposit 2
+        description: ""
+        disabled: false
+      - id: pair_344ca5f28daf4d88b8ab05a7b3e65ed1
+        name: type
+        value: standard
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744845.5
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_489d751fe4ed4f8cb3b4bf2ac6bc0377
+    parentId: fld_ca2d0319dee74626ae2ae84f19ec5ac1
+    modified: 1640779865766
+    created: 1640776261826
+    url: "{{ _.user }}"
+    name: 200 OK
+    description: ""
+    method: DELETE
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_3efd95a663534fdd8ba38341269662ac
+        name: token
+        value: 5b87f578-68a0-11ec-8d98-525400b8ef1f
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744833
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_7ecc9d3d641140e290b2e90ccd3601f3
+    parentId: fld_b5b4d169f48e4b24b9fdfbc714093b0a
+    modified: 1640781594958
+    created: 1640781463650
+    url: "{{ _.history }}"
+    name: 200 OK of the specific
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_3efd95a663534fdd8ba38341269662ac
+        name: token
+        value: "{{ _.token }}"
+        description: ""
+      - id: pair_e88b9d45b3084fc3834fee991b1e814b
+        name: name
+        value: Test deposit
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744833
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: fld_b5b4d169f48e4b24b9fdfbc714093b0a
+    parentId: wrk_c36c82708d144ae8a143684ef5697fdb
+    modified: 1640781475963
+    created: 1640781463642
+    name: Get the deposit's transaction history
+    description: ""
+    environment: {}
+    environmentPropertyOrder: {}
+    metaSortKey: -1639934370448.2031
+    _type: request_group
+  - _id: req_d4a949a9a94842018e4c6bf871162eca
+    parentId: fld_b5b4d169f48e4b24b9fdfbc714093b0a
+    modified: 1640781603388
+    created: 1640781463654
+    url: "{{ _.history }}"
+    name: 400 Missing header
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_3efd95a663534fdd8ba38341269662ac
+        name: token
+        value: "{{ _.token }}"
+        description: ""
+        disabled: true
+      - id: pair_dc4251df30514c82bda4d74dbd37b60d
+        name: name
+        value: Test deposit
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744831.4375
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_c74a68ad61554d28b115cf2c2601b5d8
+    parentId: fld_b5b4d169f48e4b24b9fdfbc714093b0a
+    modified: 1640781618879
+    created: 1640781463657
+    url: "{{ _.history }}"
+    name: 400 Invalid token
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_3efd95a663534fdd8ba38341269662ac
+        name: token
+        value: "1234567890"
+        description: ""
+        disabled: false
+      - id: pair_aca39e859d564811b9910be54948850f
+        name: name
+        value: Test Deposit
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744830.6562
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_69890f3232774d3ca00db58fbdbf0866
+    parentId: fld_b5b4d169f48e4b24b9fdfbc714093b0a
+    modified: 1640781635442
+    created: 1640781463660
+    url: "{{ _.history }}"
+    name: 401 Unknown token
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_3efd95a663534fdd8ba38341269662ac
+        name: token
+        value: fe3d8244-65bc-11ec-be32-525400b8ef1f
+        description: ""
+        disabled: false
+      - id: pair_506b5003abd2410aa98002205804b88f
+        name: name
+        value: Test deposit
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744830.2656
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_45f6876a3ad44e939d92b34258b74ee5
+    parentId: fld_b5b4d169f48e4b24b9fdfbc714093b0a
+    modified: 1640781949723
+    created: 1640781463664
+    url: "{{ _.history }}"
+    name: 404 Unknown deposit
+    description: ""
+    method: GET
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_3efd95a663534fdd8ba38341269662ac
+        name: token
+        value: "{{ _.token }}"
+        description: ""
+      - id: pair_e88b9d45b3084fc3834fee991b1e814b
+        name: name
+        value: deposit
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744805.2656
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
+  - _id: req_43d83806d8364ee18bde825e892110d1
+    parentId: fld_b5b4d169f48e4b24b9fdfbc714093b0a
+    modified: 1640781700498
+    created: 1640781463662
+    url: "{{ _.history }}"
+    name: 405 Invalid method
+    description: ""
+    method: POST
+    body: {}
+    parameters: []
+    headers:
+      - id: pair_5e80064b083c417fb2ca82b1b388bb94
+        name: token
+        value: "{{ _.token }}"
+        description: ""
+      - id: pair_e8a5a29409e2419ba6acadeba419bfcd
+        name: name
+        value: Test deposit
+        description: ""
+        disabled: false
+      - id: pair_344ca5f28daf4d88b8ab05a7b3e65ed1
+        name: type
+        value: standard
+        description: ""
+    authentication: {}
+    metaSortKey: -1640607744780.2656
+    isPrivate: false
+    settingStoreCookies: true
+    settingSendCookies: true
+    settingDisableRenderRequestBody: false
+    settingEncodeUrl: true
+    settingRebuildPath: true
+    settingFollowRedirects: global
+    _type: request
   - _id: env_35a963f5b983f949dad57aa9b1ffcf1b76fa4a0f
     parentId: wrk_c36c82708d144ae8a143684ef5697fdb
-    modified: 1640773440829
+    modified: 1640781943736
     created: 1639381500763
     name: Base Environment
     data:
@@ -1825,7 +2154,8 @@ resources:
       user: "{{ _.base_url }}/user"
       exit: "{{ _.base_url }}/exit"
       deposit: "{{ _.base_url }}/deposit"
-      token: 67d925a0-6891-11ec-8d98-525400b8ef1f
+      history: "{{ _.base_url }}/history"
+      token: 394f6942-68a5-11ec-8d98-525400b8ef1f
     dataPropertyOrder:
       "&":
         - protocol
@@ -1835,6 +2165,7 @@ resources:
         - user
         - exit
         - deposit
+        - history
         - token
     color: null
     isPrivate: false
