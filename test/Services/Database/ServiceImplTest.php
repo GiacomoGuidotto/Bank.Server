@@ -15,7 +15,7 @@ class ServiceImplTest extends TestCase
     protected ServiceImpl $service;
     protected string $validUsername = 'giacomo.guidotto';
     protected string $validPassword = 'Fr6/ese342f';
-    protected string $validDeposit = 'test deposit';
+    protected string $validDeposit = 'Test deposit';
     protected string $validToken;
 
     /**
@@ -352,5 +352,20 @@ class ServiceImplTest extends TestCase
         echo json_encode($testedArray, JSON_PRETTY_PRINT);
 
         self::assertNull($testedArray);
+    }
+
+    // ==== Get the deposit's transaction history ==============================
+
+    public function testGetTransactions()
+    {
+        $testedArray = $this->service->getHistory(
+            $this->validToken,
+            $this->validDeposit
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+        self::assertNotEmpty($testedArray);
+
     }
 }
