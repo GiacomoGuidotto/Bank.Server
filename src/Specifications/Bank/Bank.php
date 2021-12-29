@@ -13,4 +13,7 @@ interface Bank
     const BRANCH_CODE = '37592';
 
     const MINIMUM_SAVING_AMOUNT = 0;
+
+    const AMOUNT_DIVISOR = 100;
+    const AMOUNT_CURRENCY = 'USD';
 }

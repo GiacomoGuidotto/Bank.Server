@@ -36,6 +36,8 @@ namespace Specifications\ErrorCases;
  * 50 Invalid deposit amount
  * 51 Invalid destination deposit
  * 52 Going negative
+ * 53 Not empty deposit
+ * 54 Update with 0
  */
 interface ErrorCases
 {
@@ -54,7 +56,9 @@ interface ErrorCases
         Forbidden::CODE => 403,
         InvalidDepositAmount::CODE => 406,
         InvalidDestinationDeposit::CODE => 406,
-        GoingNegative::CODE => 406
+        GoingNegative::CODE => 406,
+        NotEmptyDeposit::CODE => 406,
+        UpdateWithZero::CODE => 406
     ];
 
     const ERROR_MESSAGES = [
@@ -73,7 +77,9 @@ interface ErrorCases
         Forbidden::CODE => Forbidden::MESSAGE,
         InvalidDepositAmount::CODE => InvalidDepositAmount::MESSAGE,
         InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::MESSAGE,
-        GoingNegative::CODE => GoingNegative::MESSAGE
+        GoingNegative::CODE => GoingNegative::MESSAGE,
+        NotEmptyDeposit::CODE => NotEmptyDeposit::MESSAGE,
+        UpdateWithZero::CODE => UpdateWithZero::MESSAGE
     ];
     const ERROR_DETAILS = [
         Success::CODE => Success::DETAILS,
@@ -91,7 +97,9 @@ interface ErrorCases
         Forbidden::CODE => Forbidden::DETAILS,
         InvalidDepositAmount::CODE => InvalidDepositAmount::DETAILS,
         InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::DETAILS,
-        GoingNegative::CODE => GoingNegative::DETAILS
+        GoingNegative::CODE => GoingNegative::DETAILS,
+        NotEmptyDeposit::CODE => NotEmptyDeposit::DETAILS,
+        UpdateWithZero::CODE => UpdateWithZero::DETAILS
     ];
 }
 
@@ -218,4 +226,18 @@ interface GoingNegative
     const CODE = 52;
     const MESSAGE = "the withdraw is too much";
     const DETAILS = "the amount to withdraw are going negative on the deposit amount";
+}
+
+interface NotEmptyDeposit
+{
+    const CODE = 53;
+    const MESSAGE = "the deposit is not empty";
+    const DETAILS = "the deposit can't be deleted because is not empty";
+}
+
+interface UpdateWithZero
+{
+    const CODE = 54;
+    const MESSAGE = "the deposit can't be 0";
+    const DETAILS = "the amount to deposit/withdraw can't be 0";
 }

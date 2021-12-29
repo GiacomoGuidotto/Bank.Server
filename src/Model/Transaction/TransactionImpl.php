@@ -9,6 +9,7 @@ use Specifications\ErrorCases\ExceedingMinRange;
 use Specifications\ErrorCases\IncorrectParsing;
 use Specifications\ErrorCases\IncorrectPattern;
 use Specifications\ErrorCases\Success;
+use Specifications\ErrorCases\UpdateWithZero;
 
 class TransactionImpl implements Transaction
 {
@@ -31,10 +32,13 @@ class TransactionImpl implements Transaction
      */
     public static function validateAmount(int $amount): int
     {
+        if ($amount == 0) {
+            return UpdateWithZero::CODE;
+        }
         if ($amount > 2 ** 31 - 1) {
             return ExceedingMaxRange::CODE;
         }
-        if ($amount < -(2 ** 31 - 1)) {
+        if ($amount < 0) {
             return ExceedingMinRange::CODE;
         }
 

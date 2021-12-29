@@ -15,6 +15,7 @@ use Specifications\ErrorCases\ErrorCases;
 use Specifications\ErrorCases\GoingNegative;
 use Specifications\ErrorCases\InvalidDepositAmount;
 use Specifications\ErrorCases\InvalidDestinationDeposit;
+use Specifications\ErrorCases\NotEmptyDeposit;
 use Specifications\ErrorCases\NotFound;
 use Specifications\ErrorCases\NullAttributes;
 use Specifications\ErrorCases\Success;
@@ -76,7 +77,7 @@ class ServiceImpl implements Service
         );
 
         // ==== username not found ===============
-        if (!$storedPasswordRow) {
+        if ($storedPasswordRow === false) {
             $this->module->commitTransaction();
             return $this->generateErrorMessage(NotFound::CODE);
         }
@@ -89,7 +90,9 @@ class ServiceImpl implements Service
         }
 
         $userId = $this->module->fetchOne(
-            'SELECT user_id FROM users WHERE username = :username',
+            'SELECT user_id 
+                   FROM users 
+                   WHERE username = BINARY :username AND active = TRUE',
             [
                 ':username' => $username
             ]
@@ -416,6 +419,19 @@ class ServiceImpl implements Service
             return $this->generateErrorMessage($tokenAuthorization);
         }
 
+        // ==== Close user deposits ==============
+        $userDeposits = $this->getDeposits($token, null);
+
+        foreach ($userDeposits as $userDeposit) {
+            $this->deleteDeposit($token, $userDeposit['name']);
+        }
+
+        // ==== Close user loans =================
+        // TODO call closeLoans() methods on cascade
+
+        // ==== Close user session ===============
+        $this->closeSession($token);
+
         // =======================================
         $this->module->beginTransaction();
 
@@ -438,9 +454,6 @@ class ServiceImpl implements Service
         );
 
         $this->module->commitTransaction();
-
-        // TODO call closeDeposits and closeLoans() methods on cascade
-        $this->closeSession($token);
         return null;
     }
 
@@ -535,7 +548,7 @@ class ServiceImpl implements Service
             $this->module->commitTransaction();
 
             // ==== deposit lists not found ======
-            if (!$deposits) {
+            if ($deposits === false) {
                 return $this->generateErrorMessage(NotFound::CODE);
             }
 
@@ -564,7 +577,7 @@ class ServiceImpl implements Service
             $this->module->commitTransaction();
 
             // ==== deposit lists not found ======
-            if (!$deposit) {
+            if ($deposit === false) {
                 return $this->generateErrorMessage(NotFound::CODE);
             }
 
@@ -737,7 +750,7 @@ class ServiceImpl implements Service
         );
 
         // ==== Destination deposit not found ====
-        if (!$destinationDepositRow) {
+        if ($destinationDepositRow === false) {
             $this->module->commitTransaction();
             return $this->generateErrorMessage(InvalidDestinationDeposit::CODE);
         }
@@ -756,7 +769,7 @@ class ServiceImpl implements Service
         );
 
         // ==== Deposit to delete not found ======
-        if (!$depositRow) {
+        if ($depositRow === false) {
             $this->module->commitTransaction();
             return $this->generateErrorMessage(NotFound::CODE);
         }
@@ -773,6 +786,63 @@ class ServiceImpl implements Service
                 ':destination' => $destinationDeposit
             ]
         );
+
+        $this->module->execute(
+            'UPDATE deposits
+                   SET active = FALSE
+                   WHERE name = :name',
+            [
+                ':name' => $name
+            ]
+        );
+
+        $this->module->commitTransaction();
+        return $this->getDeposits($token, null);
+    }
+
+    // ==== Delete a specific deposit ==========================================
+
+    /**
+     * @inheritDoc
+     */
+    public function deleteDeposit(
+        string $token,
+        string $name
+    ): array
+    {
+        $tokenValidation = SessionImpl::validateToken($token);
+        $nameValidation = DepositImpl::validateName($name);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+        if ($nameValidation != Success::CODE) {
+            return $this->generateErrorMessage($nameValidation);
+        }
+
+        // ==== Token authorization ==============
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        // =======================================
+        $this->module->beginTransaction();
+
+        $depositAmount = $this->module->fetchOne(
+            'SELECT amount 
+                   FROM deposits 
+                   WHERE name = :name',
+            [
+                ':name' => $name
+            ]
+        )['amount'];
+
+        if ($depositAmount != 0) {
+            $this->module->commitTransaction();
+            return $this->generateErrorMessage(NotEmptyDeposit::CODE);
+        }
 
         $this->module->execute(
             'UPDATE deposits
@@ -847,7 +917,7 @@ class ServiceImpl implements Service
         );
 
         // ==== Deposit not found ================
-        if (!$depositRow) {
+        if ($depositRow === false) {
             $this->module->commitTransaction();
             return $this->generateErrorMessage(NotFound::CODE);
         }

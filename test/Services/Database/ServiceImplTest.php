@@ -4,7 +4,6 @@ namespace Services\Database;
 
 use Model\Deposit\DepositImpl;
 use Model\Session\SessionImpl;
-use Model\Transaction\TransactionImpl;
 use Model\User\UserImpl;
 use PHPUnit\Framework\TestCase;
 use Specifications\ErrorCases\AlreadyExist;
@@ -283,7 +282,6 @@ class ServiceImplTest extends TestCase
 
         echo json_encode($testedArray, JSON_PRETTY_PRINT);
 
-
         self::assertEquals(
             Success::CODE,
             DepositImpl::validateName($testedArray['name'])
@@ -313,5 +311,46 @@ class ServiceImplTest extends TestCase
             GoingNegative::CODE,
             $testedArray['error']
         );
+    }
+
+    // ==== Delete specific user with deposit ==================================
+
+    public function testDeleteUserAndDeposit()
+    {
+        $dummyUsername = 'test_user';
+
+        $this->service->createUser(
+            $dummyUsername,
+            $this->validPassword,
+            'Test',
+            'User'
+        );
+
+        $dummyToken = $this->service->authenticate(
+            $dummyUsername,
+            $this->validPassword
+        )['token'];
+
+        $this->service->createDeposit(
+            $dummyToken,
+            'dummy deposit',
+            'standard',
+            null
+        );
+
+        $this->service->createDeposit(
+            $dummyToken,
+            'dummy deposit 2',
+            'standard',
+            null
+        );
+
+        $testedArray = $this->service->closeUser(
+            $dummyToken
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+        self::assertNull($testedArray);
     }
 }

@@ -144,6 +144,25 @@ interface Service
         string $destinationDeposit
     ): array;
 
+    // ==== Freeze a specific deposit ==========================================
+
+    /**
+     * Delete a specific deposit
+     * Make a specific deposit unreachable without caring about the
+     * money transfer
+     *
+     * @param string $token the token used to authenticate the user
+     *                      extracted from the request
+     * @param string $name the deposit identifier (its name)
+     *                     extracted from the request
+     * @return array the new deposits list
+     *               saved in an array as a object
+     */
+    public function deleteDeposit(
+        string $token,
+        string $name
+    ): array;
+
     // ==== Update the deposit amount ==========================================
 
     /**
