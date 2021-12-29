@@ -5,6 +5,7 @@ namespace Model\Transaction;
 use Specifications\ErrorCases\ExceedingMaxLength;
 use Specifications\ErrorCases\ExceedingMaxRange;
 use Specifications\ErrorCases\ExceedingMinLength;
+use Specifications\ErrorCases\ExceedingMinRange;
 use Specifications\ErrorCases\IncorrectParsing;
 use Specifications\ErrorCases\IncorrectPattern;
 use Specifications\ErrorCases\Success;
@@ -32,6 +33,9 @@ class TransactionImpl implements Transaction
     {
         if ($amount > 2 ** 31 - 1) {
             return ExceedingMaxRange::CODE;
+        }
+        if ($amount < -(2 ** 31 - 1)) {
+            return ExceedingMinRange::CODE;
         }
 
         return Success::CODE;

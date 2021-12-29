@@ -6,12 +6,14 @@ use DateInterval;
 use JetBrains\PhpStorm\ArrayShape;
 use Model\Deposit\DepositImpl;
 use Model\Session\SessionImpl;
+use Model\Transaction\TransactionImpl;
 use Model\User\UserImpl;
 use Specifications\Bank\Bank;
 use Specifications\Database\Database;
 use Specifications\ErrorCases\AlreadyExist;
 use Specifications\ErrorCases\ErrorCases;
 use Specifications\ErrorCases\Forbidden;
+use Specifications\ErrorCases\GoingNegative;
 use Specifications\ErrorCases\InvalidDepositAmount;
 use Specifications\ErrorCases\InvalidDestinationDeposit;
 use Specifications\ErrorCases\NotFound;
@@ -759,8 +761,117 @@ class ServiceImpl implements Service
      */
     public function updateDeposit(string $token, string $name, string $action, int $amount): array
     {
-        // TODO: Implement updateDeposit() method.
-        return [];
+        $tokenValidation = SessionImpl::validateToken($token);
+        $nameValidation = DepositImpl::validateName($name);
+        $actionValidation = TransactionImpl::validateType($action);
+        $amountValidation = TransactionImpl::validateAmount($amount);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+        if ($nameValidation != Success::CODE) {
+            return $this->generateErrorMessage($nameValidation);
+        }
+        if ($actionValidation != Success::CODE) {
+            return $this->generateErrorMessage($actionValidation);
+        }
+        if ($amountValidation != Success::CODE) {
+            return $this->generateErrorMessage($amountValidation);
+        }
+
+        // ==== Token authorization ==============
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        // =======================================
+        $this->module->beginTransaction();
+
+        $userId = $this->module->fetchOne(
+            'SELECT user 
+                   FROM sessions 
+                   WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        )['user'];
+
+        $depositRow = $this->module->fetchOne(
+            'SELECT deposit_id, amount, type 
+                   FROM deposits 
+                   WHERE name = :name AND user = :user AND active = TRUE',
+            [
+                ':name' => $name,
+                ':user' => $userId
+            ]
+        );
+
+        // ==== Deposit not found ================
+        if (!$depositRow) {
+            $this->module->commitTransaction();
+            return $this->generateErrorMessage(NotFound::CODE);
+        }
+
+        $depositAmount = $depositRow['amount'];
+
+        $newAmount = $action == 'deposit' ? $depositAmount + $amount : $depositAmount - $amount;
+
+        // ==== Withdraw going negative ==========
+        if ($newAmount < 0) {
+            $this->module->commitTransaction();
+            return $this->generateErrorMessage(GoingNegative::CODE);
+        }
+
+        // ==== Valid transaction ================
+        $this->module->execute(
+            'UPDATE deposits
+                   SET amount = :amount
+                   WHERE name = :name',
+            [
+                ':amount' => $newAmount,
+                ':name' => $name
+            ]
+        );
+
+        // ==== save transaction =================
+        $depositId = $depositRow['deposit_id'];
+
+        $userRow = $this->module->fetchOne(
+            'SELECT name, surname FROM users WHERE user_id = :user_id',
+            [
+                ':user_id' => $userId
+            ]
+        );
+        $userName = $userRow['name'] . ' ' . $userRow['surname'];
+
+        $this->module->execute(
+            'INSERT 
+                   INTO transactions (type, amount, timestamp, author, user, deposit)
+                   VALUES (
+                           :type,
+                           :amount,
+                           CURRENT_TIMESTAMP(),
+                           :author,
+                           :user,
+                           :deposit
+                   )',
+            [
+                ':type' => $action,
+                ':amount' => $amount,
+                ':author' => $userName,
+                ':user' => $userId,
+                ':deposit' => $depositId
+            ]
+        );
+
+        $this->module->commitTransaction();
+        return [
+            'name' => $name,
+            'amount' => $newAmount,
+            'type' => $depositRow['type']
+        ];
     }
 
     // ==== Get the deposit's transaction history ==============================

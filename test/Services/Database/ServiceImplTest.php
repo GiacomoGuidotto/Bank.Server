@@ -4,9 +4,11 @@ namespace Services\Database;
 
 use Model\Deposit\DepositImpl;
 use Model\Session\SessionImpl;
+use Model\Transaction\TransactionImpl;
 use Model\User\UserImpl;
 use PHPUnit\Framework\TestCase;
 use Specifications\ErrorCases\AlreadyExist;
+use Specifications\ErrorCases\GoingNegative;
 use Specifications\ErrorCases\Success;
 
 class ServiceImplTest extends TestCase
@@ -14,6 +16,7 @@ class ServiceImplTest extends TestCase
     protected ServiceImpl $service;
     protected string $validUsername = 'giacomo.guidotto';
     protected string $validPassword = 'Fr6/ese342f';
+    protected string $validDeposit = 'test deposit';
     protected string $validToken;
 
     /**
@@ -258,12 +261,57 @@ class ServiceImplTest extends TestCase
     {
         $testedArray = $this->service->closeDeposit(
             $this->validToken,
-            'lYIQRiRA',
-            'kgiOOVUS'
+            'DKkzxKPD',
+            $this->validDeposit,
         );
 
         echo json_encode($testedArray, JSON_PRETTY_PRINT);
 
         self::assertNotEmpty($testedArray);
+    }
+
+    // ==== Update the deposit amount ==========================================
+
+    public function testUpdateDeposit()
+    {
+        $testedArray = $this->service->updateDeposit(
+            $this->validToken,
+            $this->validDeposit,
+            'deposit',
+            1000
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+
+        self::assertEquals(
+            Success::CODE,
+            DepositImpl::validateName($testedArray['name'])
+        );
+        self::assertEquals(
+            Success::CODE,
+            DepositImpl::validateAmount($testedArray['amount'])
+        );
+        self::assertEquals(
+            Success::CODE,
+            DepositImpl::validateType($testedArray['type'])
+        );
+    }
+
+    public function testWithdrawTooMuch()
+    {
+        $testedArray = $this->service->updateDeposit(
+            $this->validToken,
+            $this->validDeposit,
+            'withdraw',
+            10000
+        );
+
+        echo json_encode($testedArray, JSON_PRETTY_PRINT);
+
+        self::assertEquals(
+            GoingNegative::CODE,
+            $testedArray['error']
+        );
     }
 }

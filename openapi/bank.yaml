@@ -303,8 +303,8 @@ paths:
           schema:
             type: string
             enum:
-              - Deposit
-              - Withdraw
+              - deposit
+              - withdraw
           description: |
             the identifier of the update action
         - name: amount

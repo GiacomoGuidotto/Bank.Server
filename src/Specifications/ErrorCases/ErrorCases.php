@@ -35,7 +35,7 @@ namespace Specifications\ErrorCases;
  * ==== elaboration-related ====
  * 50 Invalid deposit amount
  * 51 Invalid destination deposit
- *
+ * 52 Going negative
  */
 interface ErrorCases
 {
@@ -53,7 +53,8 @@ interface ErrorCases
         Timeout::CODE => 401,
         Forbidden::CODE => 403,
         InvalidDepositAmount::CODE => 406,
-        InvalidDestinationDeposit::CODE => 406
+        InvalidDestinationDeposit::CODE => 406,
+        GoingNegative::CODE => 406
     ];
 
     const ERROR_MESSAGES = [
@@ -71,7 +72,8 @@ interface ErrorCases
         Timeout::CODE => Timeout::MESSAGE,
         Forbidden::CODE => Forbidden::MESSAGE,
         InvalidDepositAmount::CODE => InvalidDepositAmount::MESSAGE,
-        InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::MESSAGE
+        InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::MESSAGE,
+        GoingNegative::CODE => GoingNegative::MESSAGE
     ];
     const ERROR_DETAILS = [
         Success::CODE => Success::DETAILS,
@@ -88,7 +90,8 @@ interface ErrorCases
         Timeout::CODE => Timeout::DETAILS,
         Forbidden::CODE => Forbidden::DETAILS,
         InvalidDepositAmount::CODE => InvalidDepositAmount::DETAILS,
-        InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::DETAILS
+        InvalidDestinationDeposit::CODE => InvalidDestinationDeposit::DETAILS,
+        GoingNegative::CODE => GoingNegative::DETAILS
     ];
 }
 
@@ -208,4 +211,11 @@ interface InvalidDestinationDeposit
     const CODE = 51;
     const MESSAGE = "the deposit of destination is invalid";
     const DETAILS = "the deposit targeted as destination doesn't exist";
+}
+
+interface GoingNegative
+{
+    const CODE = 52;
+    const MESSAGE = "the withdraw is too much";
+    const DETAILS = "the amount to withdraw are going negative on the deposit amount";
 }
