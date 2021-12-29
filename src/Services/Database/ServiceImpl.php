@@ -12,7 +12,6 @@ use Specifications\Bank\Bank;
 use Specifications\Database\Database;
 use Specifications\ErrorCases\AlreadyExist;
 use Specifications\ErrorCases\ErrorCases;
-use Specifications\ErrorCases\Forbidden;
 use Specifications\ErrorCases\GoingNegative;
 use Specifications\ErrorCases\InvalidDepositAmount;
 use Specifications\ErrorCases\InvalidDestinationDeposit;
@@ -70,7 +69,7 @@ class ServiceImpl implements Service
         $storedPasswordRow = $this->module->fetchOne(
             'SELECT password 
                    FROM users 
-                   WHERE username = :username AND active = TRUE',
+                   WHERE username = BINARY :username AND active = TRUE',
             [
                 ':username' => $username
             ]
@@ -124,7 +123,9 @@ class ServiceImpl implements Service
         );
 
         $token = $this->module->fetchOne(
-            'SELECT session_token FROM sessions WHERE session_id = LAST_INSERT_ID()'
+            'SELECT session_token 
+                   FROM sessions 
+                   WHERE session_id = LAST_INSERT_ID()'
         )['session_token'];
 
         $this->module->commitTransaction();
@@ -170,7 +171,7 @@ class ServiceImpl implements Service
         $user = $this->module->fetchOne(
             'SELECT username, name 
                    FROM users 
-                   WHERE username = :username AND active = TRUE',
+                   WHERE username = BINARY :username AND active = TRUE',
             [
                 ':username' => $username
             ]
@@ -185,7 +186,12 @@ class ServiceImpl implements Service
         $lastId = $this->module->fetchOne(
             'SELECT MAX(user_id) FROM users'
         )['MAX(user_id)'];
-        $accountNumber = str_pad($lastId, 12, '0', STR_PAD_LEFT);
+        $accountNumber = str_pad(
+            $lastId,
+            12,
+            '0',
+            STR_PAD_LEFT
+        );
         $IBAN =
             Bank::COUNTRY_CODE .
             '99' .
@@ -239,7 +245,10 @@ class ServiceImpl implements Service
      * @param string $initialTime the initial time
      * @return DateInterval the time difference in full-time format
      */
-    private function timeDifference(string $finalTime, string $initialTime): DateInterval
+    private function timeDifference(
+        string $finalTime,
+        string $initialTime
+    ): DateInterval
     {
         $finalDate = date_create($finalTime);
         $initialDate = date_create($initialTime);
@@ -255,7 +264,10 @@ class ServiceImpl implements Service
      * @param string $last_updated the moment of the last call
      * @return bool the result, true if still in time
      */
-    private function validateTimeout(string $currentTimestamp, string $last_updated): bool
+    private function validateTimeout(
+        string $currentTimestamp,
+        string $last_updated
+    ): bool
     {
         $timeToLive = date_create('midnight')
             ->add(DateInterval::createFromDateString(
@@ -358,14 +370,18 @@ class ServiceImpl implements Service
         $this->module->beginTransaction();
 
         $user_id = $this->module->fetchOne(
-            'SELECT user FROM sessions WHERE session_token = :session_token',
+            'SELECT user 
+                   FROM sessions 
+                   WHERE session_token = :session_token',
             [
                 ':session_token' => $token
             ]
         )['user'];
 
         $user = $this->module->fetchOne(
-            'SELECT username, name, surname, IBAN FROM users WHERE user_id = :user_id',
+            'SELECT username, name, surname, IBAN 
+                   FROM users 
+                   WHERE user_id = BINARY :user_id',
             [
                 ':user_id' => $user_id
             ]
@@ -404,7 +420,9 @@ class ServiceImpl implements Service
         $this->module->beginTransaction();
 
         $user_id = $this->module->fetchOne(
-            'SELECT user FROM sessions WHERE session_token = :session_token',
+            'SELECT user 
+                   FROM sessions 
+                   WHERE session_token = :session_token',
             [
                 ':session_token' => $token
             ]
@@ -495,7 +513,9 @@ class ServiceImpl implements Service
         $this->module->beginTransaction();
 
         $user_id = $this->module->fetchOne(
-            'SELECT user FROM sessions WHERE session_token = :session_token',
+            'SELECT user 
+                   FROM sessions 
+                   WHERE session_token = :session_token',
             [
                 ':session_token' => $token
             ]
@@ -506,7 +526,7 @@ class ServiceImpl implements Service
             $deposits = $this->module->fetchAll(
                 'SELECT name, amount, type 
                        FROM deposits
-                       WHERE user = :user AND active = TRUE',
+                       WHERE user = BINARY :user AND active = TRUE',
                 [
                     ':user' => $user_id
                 ]
@@ -516,7 +536,7 @@ class ServiceImpl implements Service
 
             // ==== deposit lists not found ======
             if (!$deposits) {
-                return $this->generateErrorMessage(Forbidden::CODE);
+                return $this->generateErrorMessage(NotFound::CODE);
             }
 
             $refactoredDeposits = [];
@@ -534,7 +554,7 @@ class ServiceImpl implements Service
             $deposit = $this->module->fetchOne(
                 'SELECT name, amount, type 
                        FROM deposits
-                       WHERE user = :user AND name = :name AND active = TRUE',
+                       WHERE user = BINARY :user AND name = BINARY :name AND active = TRUE',
                 [
                     ':user' => $user_id,
                     ':name' => $name
@@ -545,7 +565,7 @@ class ServiceImpl implements Service
 
             // ==== deposit lists not found ======
             if (!$deposit) {
-                return $this->generateErrorMessage(Forbidden::CODE);
+                return $this->generateErrorMessage(NotFound::CODE);
             }
 
             return [
@@ -561,7 +581,12 @@ class ServiceImpl implements Service
     /**
      * @inheritDoc
      */
-    public function createDeposit(string $token, string $name, string $type, int|null $amount): array
+    public function createDeposit(
+        string   $token,
+        string   $name,
+        string   $type,
+        int|null $amount
+    ): array
     {
         $tokenValidation = SessionImpl::validateToken($token);
         $nameValidation = DepositImpl::validateName($name);
@@ -608,7 +633,7 @@ class ServiceImpl implements Service
         $deposit = $this->module->fetchOne(
             'SELECT name 
                    FROM deposits 
-                   WHERE name = :name AND active = TRUE',
+                   WHERE name = BINARY :name AND active = TRUE',
             [
                 ':name' => $name
             ]
@@ -621,7 +646,9 @@ class ServiceImpl implements Service
 
         // ==== Elaboration ========================
         $user_id = $this->module->fetchOne(
-            'SELECT user FROM sessions WHERE session_token = :session_token',
+            'SELECT user 
+                   FROM sessions 
+                   WHERE session_token = :session_token',
             [
                 ':session_token' => $token
             ]
@@ -659,7 +686,11 @@ class ServiceImpl implements Service
     /**
      * @inheritDoc
      */
-    public function closeDeposit(string $token, string $name, string $destinationDeposit): array
+    public function closeDeposit(
+        string $token,
+        string $name,
+        string $destinationDeposit
+    ): array
     {
         $tokenValidation = SessionImpl::validateToken($token);
         $nameValidation = DepositImpl::validateName($name);
@@ -686,7 +717,9 @@ class ServiceImpl implements Service
         $this->module->beginTransaction();
 
         $user_id = $this->module->fetchOne(
-            'SELECT user FROM sessions WHERE session_token = :session_token',
+            'SELECT user 
+                   FROM sessions 
+                   WHERE session_token = :session_token',
             [
                 ':session_token' => $token
             ]
@@ -696,7 +729,7 @@ class ServiceImpl implements Service
         $destinationDepositRow = $this->module->fetchOne(
             'SELECT amount 
                    FROM deposits
-                   WHERE user = :user AND name = :destination AND active = TRUE',
+                   WHERE user = BINARY :user AND name = BINARY :destination AND active = TRUE',
             [
                 ':user' => $user_id,
                 'destination' => $destinationDeposit
@@ -715,7 +748,7 @@ class ServiceImpl implements Service
         $depositRow = $this->module->fetchOne(
             'SELECT amount
                    FROM deposits
-                   WHERE user = :user AND name = :name AND active = TRUE',
+                   WHERE user = BINARY :user AND name = BINARY :name AND active = TRUE',
             [
                 ':user' => $user_id,
                 ':name' => $name
@@ -725,7 +758,7 @@ class ServiceImpl implements Service
         // ==== Deposit to delete not found ======
         if (!$depositRow) {
             $this->module->commitTransaction();
-            return $this->generateErrorMessage(Forbidden::CODE);
+            return $this->generateErrorMessage(NotFound::CODE);
         }
 
         $depositAmount = $depositRow['amount'];
@@ -759,7 +792,12 @@ class ServiceImpl implements Service
     /**
      * @inheritDoc
      */
-    public function updateDeposit(string $token, string $name, string $action, int $amount): array
+    public function updateDeposit(
+        string $token,
+        string $name,
+        string $action,
+        int    $amount
+    ): array
     {
         $tokenValidation = SessionImpl::validateToken($token);
         $nameValidation = DepositImpl::validateName($name);
@@ -801,7 +839,7 @@ class ServiceImpl implements Service
         $depositRow = $this->module->fetchOne(
             'SELECT deposit_id, amount, type 
                    FROM deposits 
-                   WHERE name = :name AND user = :user AND active = TRUE',
+                   WHERE name = BINARY :name AND user = BINARY :user AND active = TRUE',
             [
                 ':name' => $name,
                 ':user' => $userId
@@ -816,7 +854,9 @@ class ServiceImpl implements Service
 
         $depositAmount = $depositRow['amount'];
 
-        $newAmount = $action == 'deposit' ? $depositAmount + $amount : $depositAmount - $amount;
+        $newAmount = $action == 'deposit' ?
+            $depositAmount + $amount :
+            $depositAmount - $amount;
 
         // ==== Withdraw going negative ==========
         if ($newAmount < 0) {
@@ -838,13 +878,14 @@ class ServiceImpl implements Service
         // ==== save transaction =================
         $depositId = $depositRow['deposit_id'];
 
-        $userRow = $this->module->fetchOne(
-            'SELECT name, surname FROM users WHERE user_id = :user_id',
+        $username = $this->module->fetchOne(
+            'SELECT username 
+                   FROM users 
+                   WHERE user_id = :user_id',
             [
                 ':user_id' => $userId
             ]
-        );
-        $userName = $userRow['name'] . ' ' . $userRow['surname'];
+        )['username'];
 
         $this->module->execute(
             'INSERT 
@@ -860,7 +901,7 @@ class ServiceImpl implements Service
             [
                 ':type' => $action,
                 ':amount' => $amount,
-                ':author' => $userName,
+                ':author' => $username,
                 ':user' => $userId,
                 ':deposit' => $depositId
             ]
@@ -901,7 +942,14 @@ class ServiceImpl implements Service
     /**
      * @inheritDoc
      */
-    public function createLoan(string $token, string $deposit, string $name, string $amountAsked, string $repaymentDay, string $type): array
+    public function createLoan(
+        string $token,
+        string $deposit,
+        string $name,
+        string $amountAsked,
+        string $repaymentDay,
+        string $type
+    ): array
     {
         // TODO: Implement createLoan() method.
         return [];
