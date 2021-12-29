@@ -992,8 +992,94 @@ class ServiceImpl implements Service
      */
     public function getHistory(string $token, string $name): array
     {
-        // TODO: Implement getHistory() method.
-        return [];
+        $tokenValidation = SessionImpl::validateToken($token);
+        $nameValidation = DepositImpl::validateName($name);
+
+        if ($tokenValidation != Success::CODE) {
+            return $this->generateErrorMessage($tokenValidation);
+        }
+        if ($nameValidation != Success::CODE) {
+            return $this->generateErrorMessage($nameValidation);
+        }
+
+        // ==== Token authorization ==============
+        $tokenAuthorization = $this->authorizeToken($token);
+
+        if ($tokenAuthorization != Success::CODE) {
+            return $this->generateErrorMessage($tokenAuthorization);
+        }
+
+        // =======================================
+        $this->module->beginTransaction();
+
+        $userId = $this->module->fetchOne(
+            'SELECT user 
+                   FROM sessions 
+                   WHERE session_token = :session_token',
+            [
+                ':session_token' => $token
+            ]
+        )['user'];
+
+        $depositRow = $this->module->fetchOne(
+            'SELECT deposit_id
+                   FROM deposits 
+                   WHERE name = :name',
+            [
+                ':name' => $name
+            ]
+        );
+
+        // ==== deposit not found ================
+        if ($depositRow === false) {
+            return $this->generateErrorMessage(NotFound::CODE);
+        }
+
+        $depositId = $depositRow['deposit_id'];
+
+        $username = $this->module->fetchOne(
+            'SELECT username
+                   FROM users
+                   WHERE user_id = :user_id',
+            [
+                ':user_id' => $userId
+            ]
+        )['username'];
+
+        $transactions = $this->module->fetchAll(
+            'SELECT type, amount, timestamp, author 
+                   FROM transactions
+                   WHERE user = BINARY :user AND deposit = BINARY :deposit',
+            [
+                ':user' => $userId,
+                ':deposit' => $depositId
+            ]
+        );
+
+        $this->module->commitTransaction();
+
+        // ==== deposit lists not found ==========
+        if ($transactions === false) {
+            return $this->generateErrorMessage(NotFound::CODE);
+        }
+
+        $refactoredTransactions = [];
+
+        foreach ($transactions as $transaction) {
+            $transactionAuthor =
+                $transaction['author'] == $username ?
+                    'owner' :
+                    $transaction['author'];
+
+            array_push($refactoredTransactions, [
+                'type' => $transaction['type'],
+                'amount' => $transaction['amount'],
+                'date' => $transaction['timestamp'],
+                'author' => $transactionAuthor
+            ]);
+        }
+
+        return $refactoredTransactions;
     }
 
     // ==== get the loans information ==========================================
