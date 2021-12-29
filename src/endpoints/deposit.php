@@ -121,4 +121,32 @@ if ($method == 'DELETE') {
 // ==== PUT case ===================================================================
 if ($method == 'PUT') {
 
+    // ==== get parameters =========================================================
+    $token = getallheaders()['token'];
+    $name = getallheaders()['name'];
+    $action = getallheaders()['action'];
+    $amount = getallheaders()['amount'];
+
+    // ==== Null check =============================================================
+    if ($token == null || $name == null || $action == null || $amount == null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[NullAttributes::CODE]);
+        echo json_encode(
+            $service->generateErrorMessage(NullAttributes::CODE)
+        );
+        return;
+    }
+
+    // ==== Elaboration ============================================================
+    $result = $service->updateDeposit($token, $name, $action, $amount);
+
+    // ==== Error case =============================================================
+    if ($result['error'] != null) {
+        http_response_code(ErrorCases::CODES_ASSOCIATIONS[$result['error']]);
+        echo json_encode($result);
+        return;
+    }
+
+    // ==== Success case ===========================================================
+    echo json_encode($result);
+    return;
 }

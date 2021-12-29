@@ -249,6 +249,8 @@ paths:
           $ref: "#/components/responses/405"
         406:
           $ref: "#/components/responses/406"
+        409:
+          $ref: "#/components/responses/409"
 
     delete:
       operationId: closeDeposit
@@ -333,6 +335,8 @@ paths:
           $ref: "#/components/responses/404"
         405:
           $ref: "#/components/responses/405"
+        406:
+          $ref: "#/components/responses/406"
 
   /history:
     get:
