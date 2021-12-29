@@ -9,7 +9,7 @@ use Specifications\ErrorCases\NullAttributes;
 $service = new ServiceImpl();
 
 // ==== Invalid methods checks =====================================================
-$validMethods = ['POST', 'GET', 'DELETE'];
+$validMethods = ['POST', 'GET', 'DELETE', 'PUT'];
 $method = $_SERVER['REQUEST_METHOD'];
 
 if (!in_array($method, $validMethods)) {
@@ -23,13 +23,13 @@ if (!in_array($method, $validMethods)) {
 if ($method == 'POST') {
 
     // ==== get parameters =========================================================
-    $username = getallheaders()['username'];
-    $password = getallheaders()['password'];
+    $token = getallheaders()['token'];
     $name = getallheaders()['name'];
-    $surname = getallheaders()['surname'];
+    $type = getallheaders()['type'];
+    $amount = getallheaders()['amount'];
 
     // ==== Null check =============================================================
-    if ($username == null || $password == null || $name == null || $surname == null) {
+    if ($token == null || $name == null || $type == null) {
         http_response_code(ErrorCases::CODES_ASSOCIATIONS[NullAttributes::CODE]);
         echo json_encode(
             $service->generateErrorMessage(NullAttributes::CODE)
@@ -38,7 +38,7 @@ if ($method == 'POST') {
     }
 
     // ==== Elaboration ============================================================
-    $result = $service->createUser($username, $password, $name, $surname);
+    $result = $service->createDeposit($token, $name, $type, $amount);
 
     // ==== Error case =============================================================
     if ($result['error'] != null) {
@@ -58,6 +58,7 @@ if ($method == 'GET') {
 
     // ==== get parameters =========================================================
     $token = getallheaders()['token'];
+    $name = getallheaders()['name'];
 
     // ==== Null check =============================================================
     if ($token == null) {
@@ -69,7 +70,7 @@ if ($method == 'GET') {
     }
 
     // ==== Elaboration ============================================================
-    $result = $service->getUser($token);
+    $result = $service->getDeposits($token, $name);
 
     // ==== Error case =============================================================
     if ($result['error'] != null) {
@@ -89,9 +90,11 @@ if ($method == 'DELETE') {
 
     // ==== get parameters =========================================================
     $token = getallheaders()['token'];
+    $name = getallheaders()['name'];
+    $destination = getallheaders()['destination'];
 
     // ==== Null check =============================================================
-    if ($token == null) {
+    if ($token == null || $name == null || $destination == null) {
         http_response_code(ErrorCases::CODES_ASSOCIATIONS[NullAttributes::CODE]);
         echo json_encode(
             $service->generateErrorMessage(NullAttributes::CODE)
@@ -100,7 +103,7 @@ if ($method == 'DELETE') {
     }
 
     // ==== Elaboration ============================================================
-    $result = $service->closeUser($token);
+    $result = $service->closeDeposit($token, $name, $destination);
 
     // ==== Error case =============================================================
     if ($result['error'] != null) {
@@ -110,5 +113,12 @@ if ($method == 'DELETE') {
     }
 
     // ==== Success case ===========================================================
+    echo json_encode($result);
     return;
+}
+
+// =================================================================================
+// ==== PUT case ===================================================================
+if ($method == 'PUT') {
+
 }

@@ -257,7 +257,7 @@ paths:
       parameters:
         - $ref: "#/components/parameters/sessionToken"
         - $ref: "#/components/parameters/depositIdentifier"
-        - name: destinationDeposit
+        - name: destination
           in: header
           description: The deposit identifier
           required: true
@@ -488,7 +488,7 @@ paths:
 components:
   parameters:
     sessionToken:
-      name: sessionToken
+      name: token
       in: header
       description: the token used to authenticate the user
       required: true
@@ -496,7 +496,7 @@ components:
         $ref: "#/components/parameters/sessionToken"
 
     depositIdentifier:
-      name: depositName
+      name: name
       in: header
       description: The deposit identifier
       required: true
@@ -504,7 +504,7 @@ components:
         $ref: "#/components/schemas/depositName"
 
     loanIdentifier:
-      name: loanName
+      name: name
       in: header
       description: The loan identifier
       required: true
