@@ -164,8 +164,6 @@ class ServiceImplTest extends TestCase
             $this->validPassword
         );
 
-        echo json_encode($dummyToken, JSON_PRETTY_PRINT);
-
         $testedArray = $this->service->closeUser(
             $dummyToken['token']
         );
@@ -235,7 +233,7 @@ class ServiceImplTest extends TestCase
     {
         $testedArray = $this->service->getDeposits(
             $this->validToken,
-            'lYIQRiRA'
+            'dArrjWtr'
         );
 
         echo json_encode($testedArray, JSON_PRETTY_PRINT);
@@ -260,7 +258,7 @@ class ServiceImplTest extends TestCase
     {
         $testedArray = $this->service->closeDeposit(
             $this->validToken,
-            'DKkzxKPD',
+            'dArrjWtr',
             $this->validDeposit,
         );
 

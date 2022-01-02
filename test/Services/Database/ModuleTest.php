@@ -23,14 +23,14 @@ class ModuleTest extends TestCase
     public function testCorrectDatabase()
     {
         $this->validModule->beginTransaction();
-        $databaseName = $this->validModule->fetchOne('SELECT DATABASE()');
+        $databaseName = $this->validModule->fetchOne(
+            'SELECT DATABASE()'
+        )['DATABASE()'];
         $this->validModule->commitTransaction();
-
-        $expectedRows = [
+        
+        self::assertEquals(
             'bank',
-            'DATABASE()' => 'bank'
-        ];
-
-        self::assertEquals($expectedRows, $databaseName);
+            $databaseName
+        );
     }
 }
