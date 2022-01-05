@@ -2,21 +2,27 @@
 
 require '../../vendor/autoload.php';
 
+use Services\Cors\Cors;
 use Services\Database\ServiceImpl;
 use Specifications\ErrorCases\ErrorCases;
 use Specifications\ErrorCases\NullAttributes;
 
 $service = new ServiceImpl();
 
+$method = $_SERVER['REQUEST_METHOD'];
+
+// ==== Cors check =================================================================
+Cors::handle('user');
+
+if ($method == 'OPTIONS') return;
+
 // ==== Invalid methods checks =====================================================
 $validMethods = ['POST', 'GET', 'DELETE'];
-$method = $_SERVER['REQUEST_METHOD'];
 
 if (!in_array($method, $validMethods)) {
     http_response_code(405);
     return;
 }
-
 
 // =================================================================================
 // ==== POST case ==================================================================
